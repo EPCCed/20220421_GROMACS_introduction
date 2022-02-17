@@ -2,7 +2,6 @@
 title: "Performance: getting the best bang for your (computational) buck"
 teaching: 30
 exercises: 30
-start: True
 questions:
 - "What debugging tools are available on ARCHER2 and how can I access them?"
 - "What profiling tools are available on ARCHER2 and how can I access them?"

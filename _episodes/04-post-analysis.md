@@ -1,5 +1,5 @@
 ---
-title: "ARCHER2 scheduler: Slurm"
+title: "Visualising and analysing simulation data"
 teaching: 25
 exercises: 20
 questions:

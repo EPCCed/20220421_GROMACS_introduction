@@ -1,5 +1,5 @@
 ---
-title: "ARCHER2 development environment "
+title: "Running GROMACS simulations on ARCHER2"
 teaching: 30
 exercises: 45
 questions:

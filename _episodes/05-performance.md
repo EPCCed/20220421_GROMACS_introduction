@@ -1,5 +1,5 @@
 ---
-title: "Debugging and profiling on ARCHER2"
+title: "Performance: getting the best bang for your (computational) buck"
 teaching: 30
 exercises: 30
 start: True

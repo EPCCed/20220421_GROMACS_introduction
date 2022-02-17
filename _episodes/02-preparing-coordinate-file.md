@@ -1,10 +1,9 @@
 ---
-title: "Overview of the ARCHER2 system"
+title: "Preparing a GROMACS coordinate file"
 teaching: 30
-exercises: 15
+exercises: 30
 questions:
-- "What hardware and software is available on ARCHER2?"
-- "How does the hardware fit together?"
+- "A question?"
 objectives:
 - "Gain an overview of the technology available on the ARCHER2 service."
 keypoints:

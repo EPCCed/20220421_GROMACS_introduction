@@ -10,9 +10,9 @@ humandate:
 humantime: 
 startdate: 
 enddate: 
-instructor: ["Andy Turner"]
+instructor: ["Holly Judge and Julien Sindt"]
 helper: []
-email: ["a.turner@epcc.ed.ac.uk"]
+email: ["J.Sindt@ed.ac.uk"]
 collaborative_notes: 
 eventbrite: 
 root: .
@@ -20,20 +20,24 @@ root: .
 
 <h2>Description</h2>
 
-This lesson provides an introduction to using ARCHER2 for users who:
-  - have already used other HPC systems; and
-  - want to compile (and possibly) develop HPC software on ARCHER2.
+This lesson provides an introduction to using GROMACS. GROMACS is a free 
+molecular dynamics package primarily used for simulating biochemical molecules 
+like proteins, lipids, and nucleic acids. The program is widely used, and a 
+large number of publications based on work simulated using GROMACS is 
+published every year.
 
-The lesson aims to answer the following questions:
-  - What hardware is available on ARCHER2?
-    + What does it consist of (login nodes, compute nodes, file systems, backup)?
-    + How does this impact me as a user?
-  - How can I access ARCHER2 interactively and transfer data?
-  - What does the ARCHER2 application development environment look like and how do I use it?
-  - How do I write job submission scripts and submit them to the ARCHER2 scheduler?
-  - How can I be a good ARCHER2 citizen?
-  - How can I check what resources I am using and look at historical usage?
-  - What are the next steps for me using ARCHER2 and how can I get more help?
+For this lesson, attendees will learn how to prepare, run, and analyse GROMACS 
+simulations on the ARCHER2 high-performance computing facility. Attendess will 
+learn:
+  - How to login to ARCHER2, load modules, and run jobs.
+  - How to use GROMACS functions to take generate a fully-solvated, 
+    charge-neutral GROMACS structure file from a protein databas file.
+  - How to prepare and run a GROMACS simulation of this structure file.
+  - How to analyse and visualise GROMACS simulations once they've run.
+  - How to determine whether your GROMACS simulations are running optimally. 
+
+This introductory course is intended for anyone interested in learning the 
+basics of GROMACS and how to use it.
 
 <hr/>
 

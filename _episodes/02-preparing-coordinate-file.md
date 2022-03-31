@@ -1,305 +1,280 @@
 ---
-title: "Preparing a GROMACS coordinate file"
+title: "Preparing a GROMACS system"
 teaching: 30
 exercises: 30
 questions:
 - "A question?"
 objectives:
-- "Gain an overview of the technology available on the ARCHER2 service."
+- "Learn how to prepare your system prior to running a simulation"
 keypoints:
-- "ARCHER2 consists of high performance login nodes, compute nodes, storage systems and interconnect."
-- "There is a wide range of software available on ARCHER2."
-- "The system is based on standard Linux with command line access."
+- "Creating Gromacs topology files"
+- "Creating your simulation box"
+- "Solvating a system"
+- "Adding ions to neurtalise your system"
 ---
 
-## Architecture
 
-The ARCHER2 HPE Cray EX system consists of a number of different node types. The ones visible
-to users are:
 
-* Login nodes
-* Compute nodes
-* Data analysis (pre-/post- processing) nodes
 
-All of the node types have the same processors: AMD EPYC Zen2 7742, 2.25GHz, 64-cores. All nodes
-are dual socket nodes so there are 128 cores per node.
+# Preparing a system for GROMACS
 
-{% include figure.html url="" max-width="80%" file="/fig/archer2_architecture.png" 
-alt="ARCHER2 architecture diagram" caption="ARCHER2 architecture" %}
 
-## Compute nodes
+In this lesson we will describe how to choose and
+prepare the input files for a system before to running a Gromacs 
+simulation.
 
-There are 5,860 compute nodes in total giving 748,544 compute cores on ARCHER2. There
-are 5,276 standard compute nodes with 256 GiB memory per node and 584 high memory 
-compute nodes with 512 GiB of memory per node. All of the compute nodes are linked
-together using the high-performance Cray Slingshot interconnect.
+As an example we will be looking at the XXX system which is a
 
-Access to the compute nodes is controlled by the Slurm scheduling system which supports
-both batch jobs and interactive jobs.
+This is used as an example but this process could apply to a general
+system where
+you start from a .pdb file and end up with a set of input files, ready to
+run a Gromacs simulation.
 
-Compute node summary (with comparison to ARCHER):
 
-| | ARCHER2 | ARCHER |
-|-|---------|--------|
-| Processors | 2x AMD EPYC Zen2 (Rome) 7742, 2.25 GHz, 64-core | 2x Intel E5-2697 v2, 2.7 GHz, 12-core | 
-| Cores per node | 128 | 24 |
-| NUMA | 8 NUMA regions per node, 16 cores per NUMA region | 2 NUMA regions per node, 12 cores per NUMA region |
-| Memory Capacity | 256/512 GB DDR 3200, 8 memory channels | 64/128 GB DDR 1666, 4 memory channels |
-| Memory Bandwidth | >380 GB/s per node | >119 GB/s per node |
-| Interconnect Bandwidth | 25 GB/s per node bi-directional | 15 GB/s per node bi-directional |
+### Creating a Gromacs topology (PDB2GMX)
 
-## Storage
 
-There are four different storage systems available on ARCHER2:
-
-* Home
-* Work
-* Solid State
-* RDFaaS
-
-### Home
-
-The home file systems are available on the login nodes only and are designed for the storage
-of critical source code and data for ARCHER2 users. They are backed-up regularly offsite for
-disaster recovery purposes - restoration of accidentally deleted files is not supported. There is a
-total of 1 PB usable space available on the home file systems.
-
-All users have their own directory on the home file systems at:
+The first step is to create a Gromacs topolopy for the system.
+GROMACS ``pdb2gmx`` command is used to convert a coordinate file into a 
+set of GROMACS topology files (in these examples, we will assume that the 
+file is a ``.pdb`` file, but this is not a necessity). To run this:
 
 ```
-/home/<projectID>/<subprojectID>/<userID>
+gmx pdb2gmx -f ${INPUT_FILE}.pdb
 ```
 
-For example, if your username is `auser` and you are in the project `{{site.gid}}` then your *home
-directory* will be at:
+where ``${INPUT_FILE}.pdb`` is replaced with the input file name. You will be 
+prompted to select the forcefield you would like to use. GROMACS comes with 
+a number of AMBER and GROMOS forcefields, as well as a CHARMM and an OPLS-AA
+option. You will also need to specify your water model (choices included are 
+TIP models, and the SPC and SPC/E models). Specifying the water model here 
+results in ``pdb2gmx`` to write a complete topology and will ensure that all
+topology files are consistent if the system needs to be hydrated. The code above 
+produces three outputs: a system topology ``topol.top``, a 
+position restraint file ``posre.itp`` (included in the topology file), and a coordinate file ``conf.gro``. 
+Further to these files, ``pdb2gmx`` will output a number of interesting 
+details to screen, such as the total mass of the system given the coordinates 
+and topology being used as well as the net charge of the system. The charge 
+is particularly important to note down and will be used in the `Solvating and 
+ionise a system`_ step of system preparation.
+
+More information about the flags and options of this program can be found in 
+the GROMACS 
+`PDB2GMX manual<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-pdb2gmx.html>`_.
+
+### Generating your own forcefield file
+
+
+.. note::
+
+  It is advised to use one of the pre-existing GROMACS forcefields where 
+  possible. Only consider generating your own forcefield if the ones 
+  available on GROMACS do not fulfill your requirements.
+
+GROMACS comes with a number of forcefields available out of the box. These 
+forcefields are stored within the main GROMACS directory in 
+``share/gromacs/top``. If the forcefield you want to use is not present, you
+will need to generate your own forcefield files. To do this, create a 
+directory ``<forcefield>.ff`` in your working directory, with ``<forcefield>``
+replaced by a sensible name. Within this directory, create a 
+``forcefield.doc`` file and write a simple one-sentence description of your 
+forcefield -- this description is what will come up in ``pdb2gmx`` when you 
+choose a forcefield. Next, generate a ``forcefield.itp`` included topology 
+file. This file is a topology file where you can define the parameters for 
+atoms, bond, angles, dihedrals, *etc.*. You can find more information about 
+generating topology files from scratch in the GROMACS manual 
+`file format page<http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html#top>`_.
+
+Using a ``<forcefield>.ff`` directory has a number of advantages over writing 
+out your system topologies directly. For one, this allows for better 
+reproducibility in the even that you want to simulate a new system with this 
+forcefield. It also has a number of functionalities that can be useful. For 
+instance, adding a ``watermodels.dat`` file into the forcefield directory 
+makes it easy to keep track of water models available. A line and descripting 
+can be added in this file for each water-model included topology file. This 
+file is what prompts the choice of water model in ``pdb2gmx``.
+
+Once it is populated, running ``pdb2gmx`` in the directory containing your 
+``<forcefield>.ff`` directory will result in your new forcefield being included 
+at the top of the list of selectable forcefields. If you are happy with your 
+``<forcefield>.ff`` directory and you will use it a lot (and if you have the 
+correct permissions to edit parts of the GROMACS directory), you can copy it to 
+the ``share/gromacs/top`` of the GROMACS directory (or to ``$GMXLIB`` which 
+should be the same directory). In doing so, your forcefield will become a 
+permanent part of the forcefields that ``pdb2gmx`` can use.
+
+.. note::
+
+  You can also generate an Amber or CHARMM topology by using the   AmberTool 
+  ``antechamber`` function or the CHARMM ``cgenff`` function. To do this, you 
+  should follow the procedures described above, making sure to select an 
+  appropriate forcefield from the selection GROMACS provides. Then, use a 
+  parameter-generating tool like ``antechamber`` with ``actype`` (for Amber) 
+  or ``cgenff`` (for CHARMM). The topologies generated in this way can then be 
+  added to the GROMACS topology that you generated. This can be done by 
+  opening the GROMACS topology file and including the following line at the start:
+  
+  .. code-block:: bash
+  
+    #include "/path/to/forcefield_file.itp"
+    
+  where the path is to the topology file generated in ``antechamber`` or 
+  ``cgenff``.
+
+For more information on generating your own forcefield, please see the GROMACS
+manual pages about 
+`adding a residue<http://manual.gromacs.org/documentation/current/how-to/topology.html>`_
+and `force field organisations<http://manual.gromacs.org/documentation/current/reference-manual/topologies/force-field-organization.html>`_.
+
+
+## Preparing and solvating your simulation box
+
+
+### Generating a system of replicates from a GROMACS structure file
+
+
+It is possible to populate a simulation box with molecules by replicating the contents 
+of a GROMACS structure file (``.gro``) multiple times. This can be achieved 
+with the ``insert-molecules`` command. While any structure file can be used 
+(including crowded system file), this is particularly useful if you want to 
+create a system with a large number of copies of a single molecule (*i.e.* 
+as found in a lipid bilayer or a non-aqueous solvent). Furthermore, the 
+topology (``.top``) file generated for the system to be replicated will still 
+work for the new, larger system, by including the total number of molecules in the directive [molecules].
+
+To generate a system using this command, run:
 
 ```
-/home/{{site.gid}}/{{site.gid}}/auser
-```
+gmx insert-molecules -ci ${INPUT}.gro -o ${OUTPUT}.gro \
+                       -nmol ${N} -box ${X_LENGTH} ${Y_LENGTH} ${Z_LENGTH}
+ ```
+ 
+ 
+where ``${INPUT}.gro`` is the structure file of the molecule/system you wish 
+to replicate, ``${OUTPUT}.gro`` is the output file, ``${N}`` is the number of 
+times that the contents of ``${INPUT}.gro`` will be replicated, and 
+``${X_LENGTH}``, ``${Y_LENGTH}``, and ``${Z_LENGTH}`` are the dimensions of 
+the cubic box into which these ``${N}`` replicas must be packed.
 
-> ## Home file system and Home directory
-> A potential source of confusion is the distinction between the *home file system* which is
-> the storage system on ARCHER2 used for critical data and your *home directory* which is a 
-> Linux concept of the directory that you are placed into when you first login, that is 
-> stored in the `$HOME` environment variable and that can be accessed with the `cd ~` command.
-{: .callout}
+There are number of further options to help pack your system, including a way 
+of defining the default van der Waals distance between atoms in your system, a 
+way of inserting new molecules into an existing system, and methods to control 
+the amount of random rotation that replicated molecules can undergo. All of 
+these options can be found in the 
+`gmx insert-molecules<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-insert-molecules.html>`_ page of the GROMACS manual.
 
-You can view your home file system quota and use through SAFE. Use the *Login account* menu
-to select the account you want to see the information for. The account summary page will
-contain information on your home file system use and any quotas (user or project) that
-apply to that account. (SAFE home file system use data is updated daily so the information
-may not quite match the state of the system if a large change has happened recently. Quotas
-will be completely up to date as they are controlled by SAFE.)
+### Generating a simulation box
 
-> ## Subprojects?
-> Some large projects may choose to split their resources into multiple subprojects. These 
-> subprojects will have identifiers prepended with the main project ID. For example, the
-> `rse` subgroup of the `{{site.gid}}` project would have the ID `{{site.gid}}-rse`. If the main project has
-> allocated storage quotas to the subproject the directories for this storage will be 
-> found at, for example:
-> ```
-> /home/{{site.gid}}/{{site.gid}}-rse/auser
-> ```
-> Your Linux home directory will generally not be changed when you are made a member of 
-> a subproject so you must change directories manually (or change the ownership of files)
-> to make use of this different storage quota allocation.
-{: .callout}
 
-### Work
-
-The work file systems, which are available on the login, compute and data analysis nodes, are
-designed for high performance parallel access and are the primary location that jobs running on
-the compute nodes will read data from and write data to. They are based on the Lustre parallel
-file system technology. The work file systems are not backed up in any way. There is a total of 
-14.5 PB usable space available on the work file systems.
-
-All users have their own directory on the work file systems at:
+Now that a topology has been generated, the next step is to generate a 
+simulation box into which to place this topology. For this, use the 
+``editconf`` command. This tool has a number of functionalities, including 
+generating and orienting a simulation box, and filing it with pre-generated 
+topologies. To create a simulation box with ``editconf``, run:
 
 ```
-/work/<projectID>/<subprojectID>/<userID>
+  gmx editconf -f ${INPUT}.gro -center -d ${SEPARATION} -bt ${BOX_TYPE} \
+               -o ${OUTPUT}.gro
 ```
 
-For example, if your username is `auser` and you are in the project `{{site.gid}}` then your main home
-directory will be at:
+where ``${INPUT}.gro`` is the input forcefield-compliant coordinate file, 
+``${OUTPUT}.gro`` is the chosen output name (the default is ``out.gro``), 
+the ``-c`` flag will place the system described in ``${INPUT}.gro`` into the 
+centre of the simulation box, ``-d ${SEPARATION}`` defines the minimum 
+separation between the input and the edge of the box (units are in nm), and 
+``-bt ${BOX_TYPE}`` defines the type of box for the simulation (triclinic is 
+the default, but other options are cubic, octohedral, or dodecahedral). There 
+are a number of other ``editconf`` options, predominantly to have more 
+control over defining the simulation box. These can be found in the GROMACS 
+manual 
+`gmx editconf page<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-editconf.html>`_.
+
+### Solvating a system
+
+
+The aptly-named ``solvate`` tool can be used to create a box of solvent or 
+to solvate a pre-existing box. To use it, run:
+
 
 ```
-/work/{{site.gid}}/{{site.gid}}/auser
-```
+  gmx solvate -cp ${SOLUTE}.gro -cs ${SOLVENT}.gro -p ${TOPOLOGY}.top \
+              -o ${OUTPUT}.gro
+``` 
+ 
+where ``${SOLUTE}.gro`` is the simulation box configured using the steps 
+described above, ``${SOLVENT}.gro`` is the solvent configuration file (note 
+that GROMACS has a number of pre-defined solvent configuration files but that 
+you can also prepare and use your own), and ``${TOPOLOGY}.top`` is the 
+topology obtained when running `GMX2PDB`_. If using a GROMACS-provided 
+solvent, the addition of this solvent should not alter the net charge of the 
+system.
 
-> ## Jobs can't see your data?
-> If your jobs are having trouble accessing your data make sure you have placed it on Work
-> rather than Home. Remember, the home file systems are not visible from the compute nodes.
-{: .callout}
+For further information, please see the GROMACS manual 
+`gmx solvate<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-solvate.html>`_
 
-You can view your work file system use and quota through SAFE in the same way as described 
-for the home file system above. If you want more up to date information, you can query 
-the quotas and use directly on ARCHER2 itself using the `lfs quota` command. For example,
-to query your project quota on the work file system you could use:
+### Adding ions and creating a charge-neutral system
 
-```
-lfs quota -hg {{site.gid}} /work
-```
-{: .language-bash}
-```
-Disk quotas for group {{site.gid}} (gid 1001):
-     Filesystem    used   quota   limit   grace   files   quota   limit   grace
-           /work  17.24T      0k  21.95T       - 6275076       0 10000000       -
-```
-{: .output}
 
-(Remember to replace `{{site.gid}}` with your project code.) The `used` column shows how much space
-the whole project is using and the `limit` column shows how much quota is available for the
-project. You can show your own user's use and quota with:
+Adding ions to your solvated system can serve two purposes: it can help to 
+neutralise any charge in your system; and it allows you to simulate systems 
+with similar salt concentrations to their real-world equivalents. Adding 
+ions is done in two parts: first, you need to use the ``grompp`` tool to 
+generate a ``.tpr`` file to be used when adding ions, and then you must 
+replace some of the recently-added solvent molecules with the necessary 
+counterions using ``genion``.
 
-```
-lfs quota -hu auser /work
-```
-{: .language-bash}
-```
-Disk quotas for user auser (uid 5496):
-     Filesystem    used   quota   limit   grace   files   quota   limit   grace
-           /work  8.526T      0k      0k       -  764227       0       0       -
-```
-{: .output}
+The GROMACS preprocessor tool ``grompp`` reads in coordinate and topology 
+files to generate an atomic-level input file (with a ``.tpr`` extension). 
+This ``.tpr`` file contains all of the parameters needed for all atoms in 
+the system. We will go into more details about the ``grompp`` tool in the 
+`Running a simulation`_ section. For now, the important part is that, to 
+generate a run input ``.tpr`` file, ``grompp`` needs a structure (``.gro``) 
+file, a topology (``.top``) file, and a file defining the instructions for 
+the simulation run (this is kept in an ``.mdp`` file). This ``.mdp`` file can 
+be kept empty when ionising the system as no actual simulation is to be run. 
+To generate the ``,tpr`` file, run:
 
-A limit of 0k here shows that no user quota is in place (but you are still bound by an overall
-project quota in this case.)
-
-### Solid State
-
-The solid state storage system is available on the compute nodes and is designed for
-the highest read and write performance to improve performance of workloads that are I/O bound in
-some way. Access to solid state storage resources is controlled through the Slurm scheduling 
-system. The solid state storage is not backed up in any way. There is a total of 1.1 PB usable
-space available on the solid state storage system.
-
-Data on the solid state storage is transient so all data you require before a job starts or
-after a job finishes must be *staged* on to or off of the solid state storage. We discuss how
-this works in the Scheduler episode later.
-
-### RDFaaS
-
-If you had data on the `/epsrc` or `/general` file systems on the RDF, you will be able to access
-this on ARCHER2 via the RDFaaS (RDF as a Service). The directory structure is the same as on the
-home and work file systems, so an RDF user named `auser` in the `e05` project would find their data
-on the RDFaaS at
 
 ```
-/epsrc/e05/e05/auser
-```
+  gmx grompp -f ${RUN_FILE}.mdp -c ${COORDINATES}.gro -p ${TOPOLOGY}.top \
+             -o ${OUTPUT}.tpr
+``` 
+ 
+ 
+It is likely that ``grompp`` will output a number of notes to screen (one of 
+which should be reminding you of the net non-zero charge of your system). In 
+this case, these can be ignored (this is an exception and is not usually true).
 
-Data on the RDFaaS is only visible on the login nodes, so should be copied to work before use in jobs.
-
-### Sharing data with other users
-
-Both the home and work file systems have special directories that allow you to share data 
-with other users. There are directories that allow you to share data only with other users
-in the same project and directories that allow you to share data with users in other projects.
-
-To share data with users in the same project you use the `/work/{{site.gid}}/{{site.gid}}/shared` directory
-(remember to replace `{{site.gid}}` with your project ID) and make sure the permissions on the 
-directory are correctly set to allow sharing in the project:
-
-```
-auser@ln01:~> mkdir /work/{{site.gid}}/{{site.gid}}/shared/interesting-data
-auser@ln01:~> cp -r modelling-output /work/{{site.gid}}/{{site.gid}}/shared/interesting-data/
-auser@ln01:~> chmod -R g+rX,o-rwx /work/{{site.gid}}/{{site.gid}}/shared/interesting-data
-auser@ln01:~> ls -l /work/{{site.gid}}/{{site.gid}}/shared
-```
-{: .language-bash}
-```
-total 150372
-
-...snip...
-
-drwxr-s---  2 auser  z01      4096 Jul 20 12:09 interesting-data
-
-..snip...
+Now that the ``.tpr`` has been generated, ``genion`` can be used to make the 
+charge of the system neutral. The system charge is decreased by replacing a 
+number of parts of the system with anions and cations. This is done by 
+running the following (note that the ``${INPUT}.tpr`` named below is likely 
+to be the ``${OUTPUT.tpr}`` generated in the ``grompp`` step above): 
 
 ```
-{: .output}
-
-To share data with users in other projects, you use the `/work/{{site.gid}}/shared` directory
-(remember to replace `{{site.gid}}` with your project ID) and make sure the permissions on the 
-directory are correctly set to allow sharing with all other users:
-
+gmx genion -s {INPUT}.tpr -p ${TOPOLOGY}.top -neutral -o ${OUTPUT}.gro
 ```
-auser@ln01:~> mkdir /work/{{site.gid}}/shared/more-interesting-data
-auser@ln01:~> cp -r more-modelling-output /work/{{site.gid}}/shared/more-interesting-data/
-auser@ln01:~> chmod -R go+rX /work/{{site.gid}}/shared/more-interesting-data
-auser@ln01:~> ls -l /work/{{site.gid}}/{{site.gid}}/shared
-```
-{: .language-bash}
-```
-total 150372
 
-...snip...
+You will be prompted to choose the group within your system (solvents, 
+solutes, protein backbones, *etc.*) that you would like ions to replace, with 
+the frequency of occurrence of each group also shown. Note that some groups 
+may have overlap completely and be different names for the same group. In 
+general, it is best to replace solvent molecules with ions (the group named 
+``SOL``). Once a group is chosen, ``genion`` will replace a number of that 
+group with anions and cations until the system is charge neutral. The default 
+anion name is ``CL``, though this name can be changed with the ``-nname`` 
+flag, and the default cation name is ``NA``, but this name can be changed with 
+the ``nname`` flag. By default, the cation and anion charges are 1 and -1 
+respectively, but this can be changed with the ``-pq`` flag for the cation and 
+the ``-nq`` flag for the anion.
 
-drwxr-sr-x  2 auser  z01      4096 Jul 20 12:09 more-interesting-data
+For further information, please see the GROMACS manual  
+`gmx grompp<http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_, 
+and `gmx genion<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-genion.html>`_ 
+pages.
 
-...snip...
 
-```
-{: .output}
 
-Remember, equivalent sharing directories exist on the home file system that you can
-use in exactly the same way.
-
-## System software
-
-The ARCHER2 system runs the *Cray Linux Environment* which is based on SUSE Enterprise Linux.
-The service officially supports the *bash* shell for interactive access, shell scripting and
-job submission scripts. The scheduling software is Slurm.
-
-As well as the hardware and system software, HPE Cray supply the Cray Programming Environment which
-contains:
-
-| Compilers | GCC, Cray Compilers (CCE), AMD Compilers (AOCC) |
-| Parallel libraries | Cray MPI (MPICH2-based), OpenSHMEM, Global Arrays |
-| Scientific and numerical libraries | BLAS/LAPACK/BLACS/ScaLAPACK (Cray LibSci, AMD AOCL), FFTW3, HDF5, NetCDF |
-| Debugging and profiling tools | gdb4hpc, valgrind4hpc, CrayPAT + others |
-| Optimised Python 3 environment | numpy, scipy, mpi4py, dask |
-| Optimised R environment | standard packages (including "parallel") |
-
-The largest differences from ARCHER are:
-   - Addition of optimised Python 3 and R environments
-   - Lack of Intel compilers and MKL libraries
-   - Lack of Arm Forge: DDT debugger and MAP profiler
-
-On top of the Cray-provided software, the EPCC ARCHER2 CSE service have installed a wide range 
-of modelling and simulation software, additional scientific and numeric libraries, data analysis
-tools and other useful software. Some examples of the software installed are:
-
-| Research area | Software |
-|-|-|
-| Materials and molecular modelling | CASTEP, ChemShell, CP2K, Elk, LAMMPS, NWChem, ONETEP, Quantum Espresso, VASP |
-| Engineering | Code_Saturne, FEniCS, OpenFOAM |
-| Biomolecular modelling | GROMACS, NAMD |
-| Earth system modelling | MITgcm, Met Office UM, Met Office LFRic, NEMO |
-| Scientific libraries | ARPACK, Boost, Eigen, ELPA, GSL, HYPRE, METIS, MUMPS, ParaFEM, ParMETIS, PETSc, Scotch, SLEPC, SUNDIALS, Zoltan |
-| Software tools | CDO, CGNS, NCL, NCO, Paraview, PLUMED, PyTorch, Tensorflow, VMD, VTST |
-
-> ## Licensed software
-> For licensed software installed on ARCHER2, users are expected to bring their own licences to
-> the service with them. The ARCHER2 service does not provide software licences for use by 
-> users. Access to licensed software is available via three different mechnisms:
->   - Access control groups - for software that does not support a licence server
->   - Local licence server - for software that requires a licence server running on the ARCHER2 system
->   - Remote licence server - to allow software to call out to a publicly-accessible licence server
-{: .callout}
-
-More information on the software available on ARCHER2 can be found in
-[the ARCHER2 Documentation](https://docs.archer2.ac.uk).
-
-ARCHER2 also supports the use of [Singularity containers](https://docs.archer2.ac.uk/user-guide/containers/) for single-node and multi-node jobs.
-
-> ## What about your research?
->
-> Speak to your neighbour about your planned use of ARCHER2. Given what you now know about the system,
-> what do you think the biggest opportunities are for your research in using ARCHER2? What do you think
-> the largest challenges are going to be for you?
-> 
-> Write a few sentences in the course Etherpad describing the opportunities and challenges you discussed.
 {: .challenge}
 
 {% include links.md %}

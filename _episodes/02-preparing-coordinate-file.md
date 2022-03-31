@@ -3,7 +3,7 @@ title: "Preparing a GROMACS system"
 teaching: 30
 exercises: 30
 questions:
-- "A question?"
+- "How do I set up a system ready to be run with "
 objectives:
 - "Learn how to prepare your system prior to running a simulation"
 keypoints:
@@ -23,9 +23,16 @@ In this lesson we will describe how to choose and
 prepare the input files for a system before to running a Gromacs 
 simulation.
 
-As an example we will be looking at the XXX system which is a
+As an example we will be looking at pepsin. The PDB file can be
+downloaded from the protein data bank
+using
 
-This is used as an example but this process could apply to a general
+```
+wget https://files.rcsb.org/download/5pep.pdb
+```
+
+
+This protein is used as an example but this process could apply to a general
 system where
 you start from a .pdb file and end up with a set of input files, ready to
 run a Gromacs simulation.
@@ -40,21 +47,75 @@ set of GROMACS topology files (in these examples, we will assume that the
 file is a ``.pdb`` file, but this is not a necessity). To run this:
 
 ```
-gmx pdb2gmx -f ${INPUT_FILE}.pdb
+gmx pdb2gmx -f 5pep.pdb
 ```
 
-where ``${INPUT_FILE}.pdb`` is replaced with the input file name. You will be 
+You will be 
 prompted to select the forcefield you would like to use. GROMACS comes with 
 a number of AMBER and GROMOS forcefields, as well as a CHARMM and an OPLS-AA
 option. You will also need to specify your water model (choices included are 
 TIP models, and the SPC and SPC/E models). Specifying the water model here 
 results in ``pdb2gmx`` to write a complete topology and will ensure that all
-topology files are consistent if the system needs to be hydrated. The code above 
+topology files are consistent if the system needs to be hydrated.
+
+```
+Command line:
+  gmx pdb2gmx -f 5PEP.pdb
+
+Select the Force Field:
+
+From '/work/y07/shared/apps/core/gromacs/2021.3/share/gromacs/top':
+
+ 1: AMBER03 protein, nucleic AMBER94 (Duan et al., J. Comp. Chem. 24, 1999-2012, 2003)
+
+ 2: AMBER94 force field (Cornell et al., JACS 117, 5179-5197, 1995)
+
+ 3: AMBER96 protein, nucleic AMBER94 (Kollman et al., Acc. Chem. Res. 29, 461-469, 1996)
+
+ 4: AMBER99 protein, nucleic AMBER94 (Wang et al., J. Comp. Chem. 21, 1049-1074, 2000)
+
+ 5: AMBER99SB protein, nucleic AMBER94 (Hornak et al., Proteins 65, 712-725, 2006)
+
+ 6: AMBER99SB-ILDN protein, nucleic AMBER94 (Lindorff-Larsen et al., Proteins 78, 1950-58, 2010)
+
+ 7: AMBERGS force field (Garcia & Sanbonmatsu, PNAS 99, 2782-2787, 2002)
+
+ 8: CHARMM27 all-atom force field (CHARM22 plus CMAP for proteins)
+
+ 9: GROMOS96 43a1 force field
+
+10: GROMOS96 43a2 force field (improved alkane dihedrals)
+
+11: GROMOS96 45a3 force field (Schuler JCC 2001 22 1205)
+
+12: GROMOS96 53a5 force field (JCC 2004 vol 25 pag 1656)
+
+13: GROMOS96 53a6 force field (JCC 2004 vol 25 pag 1656)
+
+14: GROMOS96 54a7 force field (Eur. Biophys. J. (2011), 40,, 843-856, DOI: 10.1007/s00249-011-0700-9)
+
+15: OPLS-AA/L all-atom force field (2001 aminoacid dihedrals)
+```
+
+Select the AMBER03 protein (option 1), followed by the TIP3P water model (option 1).
+
+```
+ls
+5PEP.pdb  conf.gro  posre.itp  topol.top
+```
+
+The code above 
 produces three outputs: a system topology ``topol.top``, a 
 position restraint file ``posre.itp`` (included in the topology file), and a coordinate file ``conf.gro``. 
 Further to these files, ``pdb2gmx`` will output a number of interesting 
 details to screen, such as the total mass of the system given the coordinates 
-and topology being used as well as the net charge of the system. The charge 
+and topology being used as well as the net charge of the system.
+
+```
+Total charge -38.000 e
+```
+
+The  total charge 
 is particularly important to note down and will be used in the `Solvating and 
 ionise a system`_ step of system preparation.
 
@@ -114,10 +175,12 @@ permanent part of the forcefields that ``pdb2gmx`` can use.
   added to the GROMACS topology that you generated. This can be done by 
   opening the GROMACS topology file and including the following line at the start:
   
-  .. code-block:: bash
-  
+
+```
     #include "/path/to/forcefield_file.itp"
-    
+```
+
+
   where the path is to the topology file generated in ``antechamber`` or 
   ``cgenff``.
 

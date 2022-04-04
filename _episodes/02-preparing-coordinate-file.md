@@ -37,17 +37,39 @@ system where
 you start from a .pdb file and end up with a set of input files, ready to
 run a Gromacs simulation.
 
+### Split up the system
+
+A pdb file downloaded from the database may not be in the format you want
+for running your simulation. For example pdb files can contain non-protein
+residues and waters. In this case we have some waters already in the pdb
+file that we want to remove as we will be solvating the system later on.
+You can see these in the pdb file if you open it. 
+
+To just get the protein itself we can use the following command to remove
+lines containing the water symbol 'HOH'.
+
+```
+grep -v 'HOH' 5pep.pdb > 5pep_protein.pdb
+```
+
 
 ### Creating a Gromacs topology (PDB2GMX)
 
 
-The first step is to create a Gromacs topolopy for the system.
+Now we can create a Gromacs topolopy for the system.
 GROMACS ``pdb2gmx`` command is used to convert a coordinate file into a 
 set of GROMACS topology files (in these examples, we will assume that the 
-file is a ``.pdb`` file, but this is not a necessity). To run this:
+file is a ``.pdb`` file, but this is not a necessity). 
+
+First you will need to load the GROMACS module on ARCHER2:
 
 ```
-gmx pdb2gmx -f 5pep.pdb
+module load gromacs
+```
+Then you can run:
+
+```
+gmx pdb2gmx -f 5pep_protein.pdb
 ```
 
 You will be 
@@ -60,7 +82,7 @@ topology files are consistent if the system needs to be hydrated.
 
 ```
 Command line:
-  gmx pdb2gmx -f 5PEP.pdb
+  gmx pdb2gmx -f 5PEP_protein.pdb
 
 Select the Force Field:
 
@@ -101,7 +123,7 @@ Select the AMBER03 protein (option 1), followed by the TIP3P water model (option
 
 ```
 ls
-5PEP.pdb  conf.gro  posre.itp  topol.top
+5PEP_protein.pdb  conf.gro  posre.itp  topol.top
 ```
 
 The code above 
@@ -124,6 +146,16 @@ the GROMACS
 `PDB2GMX manual<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-pdb2gmx.html>`_.
 
 ### Generating your own forcefield file
+
+Occasionally a system will contain non-protein residues which need separate 
+parameterisation as there are not forcefields available for them. You will 
+see a message when running pdb2gmx such as:
+
+```
+
+```
+
+In this case you must generate your own forcefield.
 
 
 .. note::
@@ -233,11 +265,10 @@ Now that a topology has been generated, the next step is to generate a
 simulation box into which to place this topology. For this, use the 
 ``editconf`` command. This tool has a number of functionalities, including 
 generating and orienting a simulation box, and filing it with pre-generated 
-topologies. To create a simulation box with ``editconf``, run:
+topologies. To create a simulation box with ``editconf``, the following is run:
 
 ```
-  gmx editconf -f ${INPUT}.gro -center -d ${SEPARATION} -bt ${BOX_TYPE} \
-               -o ${OUTPUT}.gro
+gmx editconf -f conf.gro -c -d 1 -bt cubic -o 5pep-box.gro
 ```
 
 where ``${INPUT}.gro`` is the input forcefield-compliant coordinate file, 
@@ -260,8 +291,7 @@ to solvate a pre-existing box. To use it, run:
 
 
 ```
-  gmx solvate -cp ${SOLUTE}.gro -cs ${SOLVENT}.gro -p ${TOPOLOGY}.top \
-              -o ${OUTPUT}.gro
+gmx solvate -cp 5pep-box.gro -cs spc216.gro -o 5pep-solv.gro -p topol.top
 ``` 
  
 where ``${SOLUTE}.gro`` is the simulation box configured using the steps 
@@ -299,8 +329,9 @@ To generate the ``,tpr`` file, run:
 
 
 ```
-  gmx grompp -f ${RUN_FILE}.mdp -c ${COORDINATES}.gro -p ${TOPOLOGY}.top \
-             -o ${OUTPUT}.tpr
+# create and empty mdp file 
+touch mdrun.mdp
+gmx grompp -f mdrun.mdp -c 5pep-solv.gro -p topol.top -o ions.tpr 
 ``` 
  
  
@@ -315,7 +346,7 @@ running the following (note that the ``${INPUT}.tpr`` named below is likely
 to be the ``${OUTPUT.tpr}`` generated in the ``grompp`` step above): 
 
 ```
-gmx genion -s {INPUT}.tpr -p ${TOPOLOGY}.top -neutral -o ${OUTPUT}.gro
+gmx genion -s ions.tpr -p topol.top -neutral -o 5pep-neutral.gro
 ```
 
 You will be prompted to choose the group within your system (solvents, 

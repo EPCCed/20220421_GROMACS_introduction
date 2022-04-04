@@ -225,39 +225,6 @@ and `force field organisations<http://manual.gromacs.org/documentation/current/r
 ## Preparing and solvating your simulation box
 
 
-### Generating a system of replicates from a GROMACS structure file
-
-
-It is possible to populate a simulation box with molecules by replicating the contents 
-of a GROMACS structure file (``.gro``) multiple times. This can be achieved 
-with the ``insert-molecules`` command. While any structure file can be used 
-(including crowded system file), this is particularly useful if you want to 
-create a system with a large number of copies of a single molecule (*i.e.* 
-as found in a lipid bilayer or a non-aqueous solvent). Furthermore, the 
-topology (``.top``) file generated for the system to be replicated will still 
-work for the new, larger system, by including the total number of molecules in the directive [molecules].
-
-To generate a system using this command, run:
-
-```
-gmx insert-molecules -ci ${INPUT}.gro -o ${OUTPUT}.gro \
-                       -nmol ${N} -box ${X_LENGTH} ${Y_LENGTH} ${Z_LENGTH}
- ```
- 
- 
-where ``${INPUT}.gro`` is the structure file of the molecule/system you wish 
-to replicate, ``${OUTPUT}.gro`` is the output file, ``${N}`` is the number of 
-times that the contents of ``${INPUT}.gro`` will be replicated, and 
-``${X_LENGTH}``, ``${Y_LENGTH}``, and ``${Z_LENGTH}`` are the dimensions of 
-the cubic box into which these ``${N}`` replicas must be packed.
-
-There are number of further options to help pack your system, including a way 
-of defining the default van der Waals distance between atoms in your system, a 
-way of inserting new molecules into an existing system, and methods to control 
-the amount of random rotation that replicated molecules can undergo. All of 
-these options can be found in the 
-`gmx insert-molecules<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-insert-molecules.html>`_ page of the GROMACS manual.
-
 ### Generating a simulation box
 
 

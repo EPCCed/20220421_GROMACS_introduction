@@ -3,7 +3,7 @@ title: "Preparing a GROMACS system"
 teaching: 30
 exercises: 30
 questions:
-- "How do I set up a system ready to be run with "
+- "How do I set up a system ready to be run with GROMACS"
 objectives:
 - "Learn how to prepare your system prior to running a simulation"
 keypoints:
@@ -35,9 +35,9 @@ wget https://files.rcsb.org/download/5pep.pdb
 This protein is used as an example but this process could apply to a general
 system where
 you start from a .pdb file and end up with a set of input files, ready to
-run a Gromacs simulation.
+run a GROMACS simulation.
 
-### Split up the system
+### Splitting up the system
 
 A pdb file downloaded from the database may not be in the format you want
 for running your simulation. For example pdb files can contain non-protein
@@ -45,21 +45,22 @@ residues and waters. In this case we have some waters already in the pdb
 file that we want to remove as we will be solvating the system later on.
 You can see these in the pdb file if you open it. 
 
-To just get the protein itself we can use the following command to remove
+To just get the protein itself we can use the following grep command to remove
 lines containing the water symbol 'HOH'.
 
 ```
 grep -v 'HOH' 5pep.pdb > 5pep_protein.pdb
 ```
 
+The new 5pep_protein.pdb file contains just the protein itself.
 
 ### Creating a Gromacs topology (PDB2GMX)
 
 
 Now we can create a Gromacs topolopy for the system.
 GROMACS ``pdb2gmx`` command is used to convert a coordinate file into a 
-set of GROMACS topology files (in these examples, we will assume that the 
-file is a ``.pdb`` file, but this is not a necessity). 
+set of GROMACS topology files and also create a processed structure file 
+in the GROMACS format .gro. 
 
 First you will need to load the GROMACS module on ARCHER2:
 
@@ -123,7 +124,7 @@ Select the AMBER03 protein (option 1), followed by the TIP3P water model (option
 
 ```
 ls
-5PEP_protein.pdb  conf.gro  posre.itp  topol.top
+5pep.pdb  5pep_protein.pdb  conf.gro  posre.itp  topol.top
 ```
 
 The code above 
@@ -145,6 +146,153 @@ More information about the flags and options of this program can be found in
 the GROMACS 
 `PDB2GMX manual<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-pdb2gmx.html>`_.
 
+#### The topol.top file
+
+This is the topology file for the system. You can open it with a text editor
+of your choice.
+
+```
+vi topol.top
+```
+
+Commented lines begin with a semicolon ;
+You will see a number of these at the top of the file. Followed by the following:
+
+```
+; Include forcefield parameters
+#include "amber03.ff/forcefield.itp"
+
+[ moleculetype ]
+; Name            nrexcl
+Protein_chain_A     3
+
+[ atoms ]
+;   nr       type  resnr residue  atom   cgnr     charge       mass  typeB    chargeB      massB
+; residue   1 ILE rtp NILE q +1.0
+     1         N3      1    ILE      N      1  -0.605757      14.01
+     2          H      1    ILE     H1      2   0.451919      1.008
+```
+
+The #include statemate includes the amber03 forcefield that we selected
+when running pdb2gmx. 
+
+The [ moleculetype ] gives the molecule name and the number of exclusions. 
+The [ atoms ] directive lists the atoms in the molecule, grouped by the different
+residues. The meaning of the columns are as follows:
+
+* ``nr``: atom number
+* ``type``: atom type
+* ``resnr``: residue number
+* ``atom``: atom name (these are unique to the residue)
+* ``cgnr``: charge group number
+* ``charge``: the atomic charge
+* ``mass``: the atomic mass
+* ``typeB``, ``chargeB``, ``massB``: Additional type, charge and mass used for free energy perturbation 
+
+The bonds directive lists pairs of atoms which are bonded
+```
+[ bonds ]       
+;  ai    aj funct            c0            c1            c2            c3
+    1     2     1      
+    1     3     1      
+```    
+ The pairs directive lists LJ pairs of atoms by their atom number
+ ```
+ [ pairs ]
+;  ai    aj funct            c0            c1            c2            c3
+    1     8     1
+    1     9     1
+ ```   
+ The angles directive lists triplets of 3 atoms for angle parameterisation
+ ```
+ [ angles ]
+;  ai    aj    ak funct            c0            c1            c2            c3
+    2     1     3     1
+    2     1     4     1
+```
+The dihedreal 
+```
+[ dihedrals ]
+;  ai    aj    ak    al funct            c0            c1            c2            c3            c4            c5
+    2     1     5     6     9
+    2     1     5     7     9
+```
+
+The final lines of the file are:
+```
+; Include Position restraint file
+#ifdef POSRES  
+#include "posre.itp" 
+#endif   
+   
+; Include water topology    
+#include "amber03.ff/tip3p.itp"
+   
+#ifdef POSRES_WATER 
+; Position restraint for each water oxygen
+[ position_restraints ]     
+;  i funct       fcx        fcy        fcz
+   1    1       1000       1000       1000
+#endif  
+  
+; Include topology for ions 
+#include "amber03.ff/ions.itp"
+  
+[ system ]
+; Name  
+PEPSIN  
+
+[ molecules ] 
+; Compound        #mols     
+Protein_chain_A     1
+```
+
+* This includes the position restriant file (which was created during 
+pdb2gmx) contains posisition restraits for the atoms. The if 
+statement ensures it is only applied when POSRES is true.
+
+* The water forcefield tip3p is included
+
+* The position restraints for waters
+
+* The forcefield for ions
+
+* The name of the system
+
+* The molecules in the system (so far just one protein chain
+
+#### The conf.gro file
+
+This contains the atomic coordinates of the system
+
+```
+PEPSIN
+ 4682
+    1ILE      N    1  -0.269   5.104   9.782
+    1ILE     H1    2  -0.361   5.123   9.816
+    1ILE     H2    3  -0.209   5.080   9.858
+    1ILE     H3    4  -0.234   5.185   9.735
+    1ILE     CA    5  -0.275   4.991   9.687
+    1ILE     HA    6  -0.335   5.019   9.612
+    ...
+```
+The top lines are the system name and the number of atoms.
+
+The atomic coordinates in x,y,z of each atom are then listed. These
+are preceeded by the residue number, residue name, atom name
+and atom number.
+
+At the very end of the file is the box dimensions listed as:
+
+```
+box[X][X],box[Y][Y],box[Z][Z], box[X][Y],box[X][Z],box[Y][X],box[Y][Z],box[Z][X],box[Z][Y]
+```
+
+#### The posre.itp file
+
+This file contains the position restraints for the system. The force
+constants in x,yz are listed for the atom numbers.
+
 ### Generating your own forcefield file
 
 Occasionally a system will contain non-protein residues which need separate 
@@ -155,8 +303,20 @@ see a message when running pdb2gmx such as:
 
 ```
 
-In this case you must generate your own forcefield.
+In this case you must generate your own forcefield. In GROMACS to do this
+you can generate your own forcefield files in a {forcefield}.ff directory.
+More about this can be found on the Gromacs manual.
 
+`file format page<http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html#top>`_.
+
+You can also generate an Amber or CHARMM topology by using the   AmberTool 
+ ``antechamber`` function or the CHARMM ``cgenff`` function. To do this, you 
+should follow the procedures described above, making sure to select an 
+appropriate forcefield from the selection GROMACS provides. Then, use a 
+parameter-generating tool like ``antechamber`` with ``actype`` (for Amber) 
+or ``cgenff`` (for CHARMM). The topologies generated in this way can then be 
+added to the GROMACS topology that you generated. 
+  
 
 .. note::
 
@@ -232,17 +392,17 @@ Now that a topology has been generated, the next step is to generate a
 simulation box into which to place this topology. For this, use the 
 ``editconf`` command. This tool has a number of functionalities, including 
 generating and orienting a simulation box, and filing it with pre-generated 
-topologies. To create a simulation box with ``editconf``, the following is run:
+topologies. To create the simulation box with ``editconf``, run the following:
 
 ```
 gmx editconf -f conf.gro -c -d 1 -bt cubic -o 5pep-box.gro
 ```
 
-where ``${INPUT}.gro`` is the input forcefield-compliant coordinate file, 
-``${OUTPUT}.gro`` is the chosen output name (the default is ``out.gro``), 
-the ``-c`` flag will place the system described in ``${INPUT}.gro`` into the 
+where ``coonf.gro`` is the input forcefield-compliant coordinate file, 
+``5pep-box.gro`` is the chosen output name (the default is ``out.gro``), 
+the ``-c`` flag will place the system described in ``conf.gro`` into the 
 centre of the simulation box, ``-d ${SEPARATION}`` defines the minimum 
-separation between the input and the edge of the box (units are in nm), and 
+separation between the input and the edge of the box (here 1 nm), and 
 ``-bt ${BOX_TYPE}`` defines the type of box for the simulation (triclinic is 
 the default, but other options are cubic, octohedral, or dodecahedral). There 
 are a number of other ``editconf`` options, predominantly to have more 
@@ -261,11 +421,12 @@ to solvate a pre-existing box. To use it, run:
 gmx solvate -cp 5pep-box.gro -cs spc216.gro -o 5pep-solv.gro -p topol.top
 ``` 
  
-where ``${SOLUTE}.gro`` is the simulation box configured using the steps 
-described above, ``${SOLVENT}.gro`` is the solvent configuration file (note 
+where ``5pep-box.gro`` is the simulation box configured using the steps 
+described above, ``spc216.gro`` is the solvent configuration file (note 
 that GROMACS has a number of pre-defined solvent configuration files but that 
-you can also prepare and use your own), and ``${TOPOLOGY}.top`` is the 
-topology obtained when running `GMX2PDB`_. If using a GROMACS-provided 
+you can also prepare and use your own), and ``topol.top`` is the 
+topology obtained when running `GMX2PDB`. Here ``spc216.gro`` is compatitable 
+with the 3 point tip3p model we are using. _ If using a GROMACS-provided 
 solvent, the addition of this solvent should not alter the net charge of the 
 system.
 

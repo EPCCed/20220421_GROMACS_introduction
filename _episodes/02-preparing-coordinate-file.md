@@ -410,27 +410,51 @@ control over defining the simulation box. These can be found in the GROMACS
 manual 
 `gmx editconf page<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-editconf.html>`_.
 
+If you now look at the new ``5pep-box.gro`` file you should see the box
+dimensions have changed - the box is now cubic.
+
 ### Solvating a system
 
 
 The aptly-named ``solvate`` tool can be used to create a box of solvent or 
-to solvate a pre-existing box. To use it, run:
+to solvate a pre-existing box. To solvate our systemwe will run:
 
 
 ```
 gmx solvate -cp 5pep-box.gro -cs spc216.gro -o 5pep-solv.gro -p topol.top
 ``` 
  
-where ``5pep-box.gro`` is the simulation box configured using the steps 
+where ``5pep-box.gro`` is our simulation box configured using the steps 
 described above, ``spc216.gro`` is the solvent configuration file (note 
 that GROMACS has a number of pre-defined solvent configuration files but that 
 you can also prepare and use your own), and ``topol.top`` is the 
-topology obtained when running `GMX2PDB`. Here ``spc216.gro`` is compatitable 
-with the 3 point tip3p model we are using. _ If using a GROMACS-provided 
+topology we obtained when running `GMX2PDB`. Here ``spc216.gro`` is compatitable 
+with the 3 point tip3p model we are using. If using a GROMACS-provided 
 solvent, the addition of this solvent should not alter the net charge of the 
 system.
 
-For further information, please see the GROMACS manual 
+Now we have ``5pep-solv.gro``. You should also see the message when runnning
+solvate:
+
+```
+Back Off! I just backed up topol.top to ./#topol.top.1#
+```
+
+This means that GROMACS generated a new topol.top file and renamed the old
+one to ``'#topol.top.1#'``. This is the default behavoiur when GROMACS 
+creates files with the same name as a file in your current directory.
+The new ``topol.top`` is not very different to the old one only now the
+SOL has been added to the ``[ molecules ]`` directive.
+
+```
+[ molecules ]
+; Compound        #mols
+Protein_chain_A     1
+SOL             19181
+```
+
+
+For further information on solvate, please see the GROMACS manual 
 `gmx solvate<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-solvate.html>`_
 
 ### Adding ions and creating a charge-neutral system
@@ -438,7 +462,12 @@ For further information, please see the GROMACS manual
 
 Adding ions to your solvated system can serve two purposes: it can help to 
 neutralise any charge in your system; and it allows you to simulate systems 
-with similar salt concentrations to their real-world equivalents. Adding 
+with similar salt concentrations to their real-world equivalents. 
+
+You may have noticed earlier that our system is charged. Here we will
+neutralise it by adding ions.
+
+Adding 
 ions is done in two parts: first, you need to use the ``grompp`` tool to 
 generate a ``.tpr`` file to be used when adding ions, and then you must 
 replace some of the recently-added solvent molecules with the necessary 
@@ -448,12 +477,12 @@ The GROMACS preprocessor tool ``grompp`` reads in coordinate and topology
 files to generate an atomic-level input file (with a ``.tpr`` extension). 
 This ``.tpr`` file contains all of the parameters needed for all atoms in 
 the system. We will go into more details about the ``grompp`` tool in the 
-`Running a simulation`_ section. For now, the important part is that, to 
+`Running a simulation` lesson. For now, the important part is that, to 
 generate a run input ``.tpr`` file, ``grompp`` needs a structure (``.gro``) 
 file, a topology (``.top``) file, and a file defining the instructions for 
 the simulation run (this is kept in an ``.mdp`` file). This ``.mdp`` file can 
 be kept empty when ionising the system as no actual simulation is to be run. 
-To generate the ``,tpr`` file, run:
+To generate the ``.tpr`` file, run:
 
 
 ```
@@ -463,7 +492,7 @@ gmx grompp -f mdrun.mdp -c 5pep-solv.gro -p topol.top -o ions.tpr
 ``` 
  
  
-It is likely that ``grompp`` will output a number of notes to screen (one of 
+``grompp`` will output a number of notes to screen (one of 
 which should be reminding you of the net non-zero charge of your system). In 
 this case, these can be ignored (this is an exception and is not usually true).
 
@@ -477,12 +506,37 @@ to be the ``${OUTPUT.tpr}`` generated in the ``grompp`` step above):
 gmx genion -s ions.tpr -p topol.top -neutral -o 5pep-neutral.gro
 ```
 
+
 You will be prompted to choose the group within your system (solvents, 
-solutes, protein backbones, *etc.*) that you would like ions to replace, with 
-the frequency of occurrence of each group also shown. Note that some groups 
+solutes, protein backbones, *etc.*) that you would like ions to replace.
+Note that some groups 
 may have overlap completely and be different names for the same group. In 
 general, it is best to replace solvent molecules with ions (the group named 
-``SOL``). Once a group is chosen, ``genion`` will replace a number of that 
+``SOL``). 
+
+```
+Reading file ions.tpr, VERSION 2021.3 (single precision)
+Will try to add 38 NA ions and 0 CL ions.
+Select a continuous group of solvent molecules
+Group     0 (         System) has 62225 elements
+Group     1 (        Protein) has  4682 elements
+Group     2 (      Protein-H) has  2426 elements
+Group     3 (        C-alpha) has   326 elements
+Group     4 (       Backbone) has   978 elements
+Group     5 (      MainChain) has  1305 elements
+Group     6 (   MainChain+Cb) has  1596 elements
+Group     7 (    MainChain+H) has  1618 elements
+Group     8 (      SideChain) has  3064 elements
+Group     9 (    SideChain-H) has  1121 elements
+Group    10 (    Prot-Masses) has  4682 elements
+Group    11 (    non-Protein) has 57543 elements
+Group    12 (          Water) has 57543 elements
+Group    13 (            SOL) has 57543 elements
+Group    14 (      non-Water) has  4682 elements
+Select a group: 13
+```
+
+Once the group is chosen, ``genion`` will replace a number of that 
 group with anions and cations until the system is charge neutral. The default 
 anion name is ``CL``, though this name can be changed with the ``-nname`` 
 flag, and the default cation name is ``NA``, but this name can be changed with 
@@ -490,12 +544,57 @@ the ``nname`` flag. By default, the cation and anion charges are 1 and -1
 respectively, but this can be changed with the ``-pq`` flag for the cation and 
 the ``-nq`` flag for the anion.
 
+You should see the following, indicating the water molecules that will be
+replaced by soduim ions:
+
+```
+Replacing solvent molecule 800 (atom 7082) with NA
+Replacing solvent molecule 618 (atom 6536) with NA
+Replacing solvent molecule 6992 (atom 25658) with NA
+Replacing solvent molecule 8244 (atom 29414) with NA
+Replacing solvent molecule 3746 (atom 15920) with NA
+Replacing solvent molecule 5204 (atom 20294) with NA
+Replacing solvent molecule 17626 (atom 57560) with NA
+Replacing solvent molecule 17694 (atom 57764) with NA
+Replacing solvent molecule 14834 (atom 49184) with NA
+Replacing solvent molecule 7080 (atom 25922) with NA
+Replacing solvent molecule 8206 (atom 29300) with NA
+Replacing solvent molecule 16326 (atom 53660) with NA
+Replacing solvent molecule 2039 (atom 10799) with NA
+Replacing solvent molecule 11793 (atom 40061) with NA
+Replacing solvent molecule 11087 (atom 37943) with NA
+Replacing solvent molecule 1214 (atom 8324) with NA
+Replacing solvent molecule 822 (atom 7148) with NA
+Replacing solvent molecule 11826 (atom 40160) with NA
+Replacing solvent molecule 1164 (atom 8174) with NA
+Replacing solvent molecule 8729 (atom 30869) with NA
+Replacing solvent molecule 2675 (atom 12707) with NA
+Replacing solvent molecule 7510 (atom 27212) with NA
+Replacing solvent molecule 2319 (atom 11639) with NA
+Replacing solvent molecule 5374 (atom 20804) with NA
+Replacing solvent molecule 8780 (atom 31022) with NA
+Replacing solvent molecule 12110 (atom 41012) with NA
+Replacing solvent molecule 4713 (atom 18821) with NA
+Replacing solvent molecule 17524 (atom 57254) with NA
+Replacing solvent molecule 965 (atom 7577) with NA
+Replacing solvent molecule 2713 (atom 12821) with NA
+Replacing solvent molecule 8711 (atom 30815) with NA
+Replacing solvent molecule 7607 (atom 27503) with NA
+Replacing solvent molecule 3728 (atom 15866) with NA
+Replacing solvent molecule 15300 (atom 50582) with NA
+Replacing solvent molecule 17051 (atom 55835) with NA
+Replacing solvent molecule 16208 (atom 53306) with NA
+Replacing solvent molecule 14795 (atom 49067) with NA
+Replacing solvent molecule 10177 (atom 35213) with NA
+```
+
+
 For further information, please see the GROMACS manual  
 `gmx grompp<http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_, 
 and `gmx genion<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-genion.html>`_ 
 pages.
 
-
+We are now ready to run simulations.
 
 {: .challenge}
 

@@ -32,13 +32,35 @@ energy (``.edr``) file. By default, this tool will generate an XMGrace file.
 To use this, run:
 
 ```
-  gmx energy -f ${INPUT_ENERGY_FILE}.edr -o ${OUTPUT_XMGRACE_FILE}.xvg
+  gmx energy -f ener.edr -o total_en.xvg
 ```
 
 When running this, you will get a prompt asking which property you would like 
 output (*e.g.* potential energy, kinetic energy, pressure, temperature, 
-*etc.*). Enter the correct number to generate an XMGrace file that, when 
-plotted, will show you how that property varied over the simulation run. 
+*etc.*). 
+
+```
+End your selection with an empty line or a zero.
+-------------------------------------------------------------------
+  1  Angle            2  Proper-Dih.      3  Improper-Dih.    4  LJ-14         
+  5  Coulomb-14       6  LJ-(SR)          7  Disper.-corr.    8  Coulomb-(SR)  
+  9  Coul.-recip.    10  Potential       11  Kinetic-En.     12  Total-Energy  
+ 13  Conserved-En.   14  Temperature     15  Pres.-DC        16  Pressure      
+ 17  Constr.-rmsd    18  Box-X           19  Box-Y           20  Box-Z         
+ 21  Volume          22  Density         23  pV              24  Enthalpy      
+ 25  Vir-XX          26  Vir-XY          27  Vir-XZ          28  Vir-YX        
+ 29  Vir-YY          30  Vir-YZ          31  Vir-ZX          32  Vir-ZY        
+ 33  Vir-ZZ          34  Pres-XX         35  Pres-XY         36  Pres-XZ       
+ 37  Pres-YX         38  Pres-YY         39  Pres-YZ         40  Pres-ZX       
+ 41  Pres-ZY         42  Pres-ZZ         43  #Surf*SurfTen   44  Box-Vel-XX    
+ 45  Box-Vel-YY      46  Box-Vel-ZZ      47  T-Protein       48  T-SOL         
+ 49  T-NA            50  Lamb-Protein    51  Lamb-SOL        52  Lamb-NA       
+```
+
+
+Enter the `12` to generate an XMGrace file that includes the variation
+of the Total energy over time. This can be plotted with xmgrace or other
+plotting software. 
 There are a number of other options for the ``energy`` command, and these 
 can be found in the GROMACS manual 
 `gmx energy<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-energy.html#gmx-.. energy>`_
@@ -54,16 +76,53 @@ into indexed groups. This can be done with the ``gmx make_ndx`` command. To
 use it, run:
 
 ```
-  gmx make_ndx -f ${INPUT}.gro -o ${OUTPUT}.ndx
+  gmx make_ndx -f confout.gro -o 5pep.ndx
 ```
 
-where ``${INPUT}.gro`` is a GROMACS configuration file for the trajectory you 
-are wanting to calculate the RDF for. Provided you used the default names in 
+ Provided you used the default names in 
 your ``mdrun``, you can simply use ``confout.gro``. The ``make_ndx`` command 
-will analyse the system, and output the default index groups. It is possible 
-to create new index groups by using the command prompts listed (for instance, 
-you can create a group composed of only the oxygens from the solvent waters by 
-running ``a OW`` within ``make_ndx``). For more information, please see the
+will analyse the system, and output the default index groups. 
+
+You should see something like the following:
+
+```
+
+  0 System              : 62149 atoms
+  1 Protein             :  4682 atoms
+  2 Protein-H           :  2426 atoms
+  3 C-alpha             :   326 atoms
+  4 Backbone            :   978 atoms
+  5 MainChain           :  1305 atoms
+  6 MainChain+Cb        :  1596 atoms
+  7 MainChain+H         :  1618 atoms
+  8 SideChain           :  3064 atoms
+  9 SideChain-H         :  1121 atoms
+ 10 Prot-Masses         :  4682 atoms
+ 11 non-Protein         : 57467 atoms
+ 12 Water               : 57429 atoms
+ 13 SOL                 : 57429 atoms
+ 14 non-Water           :  4720 atoms
+ 15 Ion                 :    38 atoms
+ 16 NA                  :    38 atoms
+ 17 Water_and_ions      : 57467 atoms
+ 
+  nr : group      '!': not  'name' nr name   'splitch' nr    Enter: list groups
+ 'a': atom       '&': and  'del' nr         'splitres' nr   'l': list residues
+ 't': atom type  '|': or   'keep' nr        'splitat' nr    'h': help
+ 'r': residue              'res' nr         'chain' char
+ "name": group             'case': case sensitive           'q': save and quit
+ 'ri': residue index
+ ```
+
+It is possible to create new index groups by using the command prompts listed.
+For now we will just save and quit with option ``q``.
+
+If you now open the ``5pep.ndx`` file we just generated you should see
+the different groups of atoms listed. Each number is an atom number from the 
+``confout.gro file``
+
+
+For more information on ``make_ndx``, please see the
 GROMACS manual
 `gmx make_ndx<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-make_ndx.html>`_ 
 page.

@@ -10,7 +10,7 @@ objectives:
 - "Learn how to extract the thermodynamic properties from the output"
 
 keypoints:
-- "Use of gmx energy, make_ndx, "
+- "Use of gmx energy, make_ndx, rmsd"
 - "System visualisation in vmd"
 ---
 
@@ -166,17 +166,43 @@ Root mean squared deviation
 ----------------------------
 
 
-
+```
  gmx rms -s npt.tpr -f traj_comp.xtc -n 5pep.ndx -o rmsd.xvg -tu ns
-
+```
 
 Continuing your simulation
 ---------------------------
 
-Finally you may wish to restart your simulation from the point you left off
-in order to progress the simulation further
+You may wish to restart your simulation from the point you left off
+in order to progress the simulation further or if your simulation 
+does not complete. GROMACS does checkpointing during a simulation
+to allow this. 
 
+A simulation can be restarted with
 
+```
+gmx_mpi mdrun -cpi state
+```
+
+providing you have a state.cpt checkpoint file.
+
+In our case our simulation ran to completion, so we cannot restart it,
+however we may extend it. This can be done by generating a new tpr
+file with:
+
+```
+gmx convert-tpr -s npt.tpr -extend timetoextendby -o npt-new.tpr
+```
+
+where the timetoextendby is the time in ps
+
+The job can then be run with the following gmx_mpi command:
+
+```
+gmx_mpi mdrun -s npt-new.tpr -cpi state.cpt
+```
+
+Use this to extend the simulation by 1000ps.
 
 {% include links.md %}
 

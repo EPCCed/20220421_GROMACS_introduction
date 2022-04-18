@@ -12,7 +12,7 @@ startdate:
 enddate: 
 instructor: ["Holly Judge and Julien Sindt"]
 helper: []
-email: ["J.Sindt@ed.ac.uk"]
+email: ["H.Judge@epcced.ac.uk"]
 collaborative_notes: 
 eventbrite: 
 root: .

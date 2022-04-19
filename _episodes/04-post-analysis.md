@@ -8,9 +8,10 @@ questions:
 - "How can I visualise my system?"
 objectives:
 - "Learn how to extract the thermodynamic properties from the output"
+- "Learn about the types of analysis we can perform"
 
 keypoints:
-- "Use of gmx energy, make_ndx, rmsd"
+- "Use of gmx energy, make_ndx, rms"
 - "System visualisation in vmd"
 ---
 
@@ -67,7 +68,7 @@ of the temperature over time. You will need to press Enter twice.
 The data can be plotted with xmgrace or other plotting software.
 As you can see there are a number of other options for the ``energy`` command,
 and these can be found in the GROMACS manual 
-`gmx energy<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-energy.html#gmx-.. energy>`_
+[gmx energy](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-energy.html)
 page.
 
 Visualising with VMD
@@ -156,19 +157,29 @@ the different groups of atoms listed. Each number is an atom number from the
 ``confout.gro file``
 
 Index files are useful if you wish to do analysis on specific groups of atoms.
+This can be used in calculating the RDF, order parameters, densities, 
+displacements etc. The index file can be used in a command with the ``-n``
+option.
 
 For more information on ``make_ndx``, please see the
 GROMACS manual
-`gmx make_ndx<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-make_ndx.html>`_ 
+[gmx make_ndx](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-make_ndx.html) 
 page.
 
 Root mean squared deviation
 ----------------------------
 
+The following can be run to calculate the root mean squared deviation and
+least-squares fit for a group of atoms.
 
 ```
- gmx rms -s npt.tpr -f traj_comp.xtc -n 5pep.ndx -o rmsd.xvg -tu ns
+ gmx rms -s npt.tpr -f traj.trr -n 5pep.ndx -o rmsd.xvg -tu ns
 ```
+
+You will be prompted for a group number to do the calculation for.
+Select option 4 to do the Backbone of the protein. The ``-tu`` option
+gives the time unit.
+
 
 Continuing your simulation
 ---------------------------
@@ -178,13 +189,13 @@ in order to progress the simulation further or if your simulation
 does not complete. GROMACS does checkpointing during a simulation
 to allow this. 
 
-A simulation can be restarted with
+A simulation can be restarted with:
 
 ```
 gmx_mpi mdrun -cpi state
 ```
 
-providing you have a state.cpt checkpoint file.
+providing you have a ``state.cpt`` checkpoint file.
 
 In our case our simulation ran to completion, so we cannot restart it,
 however we may extend it. This can be done by generating a new tpr
@@ -202,7 +213,16 @@ The job can then be run with the following gmx_mpi command:
 gmx_mpi mdrun -s npt-new.tpr -cpi state.cpt
 ```
 
-Use this to extend the simulation by 1000ps.
+Use this to extend the simulation by 100ps.
+
+
+
+Other analysis tools
+-----------------------
+
+A guide analysing your trajectory in GROMACS can be found on the 
+[website](https://manual.gromacs.org/documentation/2019/reference-manual/analysis.html)
+
 
 {% include links.md %}
 

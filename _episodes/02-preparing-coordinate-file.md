@@ -23,9 +23,10 @@ In this lesson we will describe how to choose and
 prepare the input files for a system before to running a Gromacs 
 simulation.
 
-As an example we will be looking at pepsin. The PDB file can be
+As an example we will be looking at pepsin. The PDB entry can be 
+found [here](https://www.rcsb.org/structure/5pep) and the PDB file can be
 downloaded from the protein data bank
-using
+using:
 
 ```
 wget https://files.rcsb.org/download/5pep.pdb
@@ -140,11 +141,11 @@ Total charge -38.000 e
 
 The  total charge 
 is particularly important to note down and will be used in the `Solvating and 
-ionise a system`_ step of system preparation.
+ionise a system` step of system preparation.
 
 More information about the flags and options of this program can be found in 
 the GROMACS 
-`PDB2GMX manual<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-pdb2gmx.html>`_.
+[PDB2GMX manual](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-pdb2gmx.html)
 
 #### The topol.top file
 
@@ -300,14 +301,14 @@ parameterisation as there are not forcefields available for them. You will
 see a message when running pdb2gmx such as:
 
 ```
-
+Residue 'XXX' not found in residue topology database
 ```
 
 In this case you must generate your own forcefield. In GROMACS to do this
 you can generate your own forcefield files in a {forcefield}.ff directory.
 More about this can be found on the Gromacs manual.
 
-`file format page<http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html#top>`_.
+[file format page](http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html)
 
 You can also generate an Amber or CHARMM topology by using the   AmberTool 
  ``antechamber`` function or the CHARMM ``cgenff`` function. To do this, you 
@@ -336,25 +337,7 @@ choose a forcefield. Next, generate a ``forcefield.itp`` included topology
 file. This file is a topology file where you can define the parameters for 
 atoms, bond, angles, dihedrals, *etc.*. You can find more information about 
 generating topology files from scratch in the GROMACS manual 
-`file format page<http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html#top>`_.
-
-Using a ``<forcefield>.ff`` directory has a number of advantages over writing 
-out your system topologies directly. For one, this allows for better 
-reproducibility in the even that you want to simulate a new system with this 
-forcefield. It also has a number of functionalities that can be useful. For 
-instance, adding a ``watermodels.dat`` file into the forcefield directory 
-makes it easy to keep track of water models available. A line and descripting 
-can be added in this file for each water-model included topology file. This 
-file is what prompts the choice of water model in ``pdb2gmx``.
-
-Once it is populated, running ``pdb2gmx`` in the directory containing your 
-``<forcefield>.ff`` directory will result in your new forcefield being included 
-at the top of the list of selectable forcefields. If you are happy with your 
-``<forcefield>.ff`` directory and you will use it a lot (and if you have the 
-correct permissions to edit parts of the GROMACS directory), you can copy it to 
-the ``share/gromacs/top`` of the GROMACS directory (or to ``$GMXLIB`` which 
-should be the same directory). In doing so, your forcefield will become a 
-permanent part of the forcefields that ``pdb2gmx`` can use.
+[file format page](http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html).
 
 .. note::
 
@@ -378,8 +361,8 @@ permanent part of the forcefields that ``pdb2gmx`` can use.
 
 For more information on generating your own forcefield, please see the GROMACS
 manual pages about 
-`adding a residue<http://manual.gromacs.org/documentation/current/how-to/topology.html>`_
-and `force field organisations<http://manual.gromacs.org/documentation/current/reference-manual/topologies/force-field-organization.html>`_.
+[adding a residue](http://manual.gromacs.org/documentation/current/how-to/topology.html)
+and [force field organisations](http://manual.gromacs.org/documentation/current/reference-manual/topologies/force-field-organization.html)
 
 
 ## Preparing and solvating your simulation box
@@ -408,7 +391,7 @@ the default, but other options are cubic, octohedral, or dodecahedral). There
 are a number of other ``editconf`` options, predominantly to have more 
 control over defining the simulation box. These can be found in the GROMACS 
 manual 
-`gmx editconf page<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-editconf.html>`_.
+[gmx editconf page](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-editconf.html)
 
 If you now look at the new ``5pep-box.gro`` file you should see the box
 dimensions have changed - the box is now cubic.
@@ -455,7 +438,7 @@ SOL             19181
 
 
 For further information on solvate, please see the GROMACS manual 
-`gmx solvate<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-solvate.html>`_
+[gmx solvate](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-solvate.html)
 
 ### Adding ions and creating a charge-neutral system
 
@@ -590,8 +573,8 @@ Replacing solvent molecule 10177 (atom 35213) with NA
 
 
 For further information, please see the GROMACS manual  
-`gmx grompp<http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_, 
-and `gmx genion<http://manual.gromacs.org/documentation/current/onlinehelp/gmx-genion.html>`_ 
+[gmx grompp](http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html),
+and [gmx genion](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-genion.html) 
 pages.
 
 We are now ready to run simulations.

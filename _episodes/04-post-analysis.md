@@ -95,7 +95,7 @@ Then to load the MD trajectory:
 
 * Make sure the following is selected,
    Load files for: 0: confout.gro
-* Browse and select ``traj_conf.xtc``
+* Browse and select ``traj.trr``
 * Then "Load"
 
 The main window will now show the motion of MD of the system.
@@ -103,7 +103,7 @@ The main window will now show the motion of MD of the system.
 This can also be done quickly by using the command
 
 ```
-vmd confout.gro traj_comp.xtc
+vmd confout.gro traj.trr
 ```
 
 
@@ -163,7 +163,7 @@ Found 19143 atoms with name OW
 
 >> ### Exercise
 >> 
->> Create a group of containing the hydrogen atoms in the water molecules.
+>> Create a group containing the hydrogen atoms in the water molecules.
 >>> ### Solution
 >>> ```
 >>> a HW1 | a HW2

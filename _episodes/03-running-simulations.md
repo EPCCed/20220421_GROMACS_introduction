@@ -3,21 +3,15 @@ title: "Running GROMACS simulations on ARCHER2"
 teaching: 30
 exercises: 45
 questions:
-- "What does the ARCHER2 development environment look like and how do I access different components?"
-- "How can I find out what compilers, tools, and libraries are available?"
-- "How can I capture my current environment for reuse or to share with others?"
-- "How can I get help with compiling and developing software on ARCHER2?"
+- ""
 objectives:
-- "Know how to access different parts of the development environment on ARCHER2 using Lmod modules."
-- "Know how to find out what is installed and where to get help."
+- ""
 keypoints:
-- "The development environment is controlled through Lmod modules."
-- "ARCHER2 supports the GCC and Cray compilers."
-- "Compilers are accessed through the `ftn`, `cc` and `CC` wrapper commands."
-- "The CSE service can help with software development issues."
+- ""
 ---
 
 ## What do we mean by classical molecular dynamics
+
 
 
 ## The GROMACS molecular dynamics parameters (MDP) file
@@ -31,7 +25,31 @@ keypoints:
 
 ## Energy minimisation
 
-You'll need to copy your `5pep-neutral.gro` and `topol.top` files.
+For this session, you will need a copy of the `5pep-neutral.gro` and 
+`topol.top` files generated in the previous session. You can either copy these 
+across or use pre-generated ones. To get the pregenerated files, run
+
+```bash
+  ; minim.mdp - used as input into grompp to generate em.tpr
+  ; Parameters describing what to do, when to stop and what to save
+  integrator  = steep         ; Algorithm (steep = steepest descent minimization)
+  emtol       = 1000.0        ; Stop minimization when the maximum force < 1000.0 kJ/mol/nm
+  emstep      = 0.01          ; Minimization step size
+  nsteps      = 50000         ; Maximum number of (minimization) steps to perform
+
+  ; Logs and outputs
+  nstlog                   = 500
+  nstenergy                = 500
+  
+  ; Parameters describing how to find the neighbors of each atom and how to calculate the interactions
+  nstlist         = 1         ; Frequency to update the neighbor list and long range forces
+  cutoff-scheme   = Verlet    ; Buffered neighbor searching
+  ns_type         = grid      ; Method to determine neighbor list (simple, grid)
+  coulombtype     = PME       ; Treatment of long range electrostatic interactions
+  rcoulomb        = 1.0       ; Short-range electrostatic cut-off
+  rvdw            = 1.0       ; Short-range Van der Waals cut-off
+  pbc             = xyz       ; Periodic Boundary Conditions in all 3 dimensions
+```
 
 ```bash
   gmx grommp -f minim.mdp -c 5pep-neutral.gro -p topol.top -o em.tpr
@@ -54,8 +72,8 @@ You'll need to copy your `5pep-neutral.gro` and `topol.top` files.
   nsteps                   = 500000
   
   ; Logs and outputs
-  nstlog                   = 5000
-  nstenergy                = 5000
+  nstlog                   = 500
+  nstenergy                = 500
   
   ; Bond constraints
   constraints              = h-bonds

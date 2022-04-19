@@ -161,10 +161,10 @@ Found 19143 atoms with name OW
 ```
 
 
->> ## Exercise
+>> ### Exercise
 >> 
 >> Create a group of containing the hydrogen atoms in the water molecules.
->>> ## Solution
+>>> ### Solution
 >>> ```
 >>> a HW1 | a HW2
 >>> q
@@ -237,10 +237,10 @@ gmx_mpi mdrun -s ${NEW}.tpr -cpi state.cpt
 ```
 
 
->> ## Exercise
+>> ### Exercise
 >> 
 >> Extend our simulation by 100ps.
->>> ## Solution
+>>> ### Solution
 >>> ```
 >>> gmx convert-tpr -s npt.tpr -extend 100 -o npt-new.tpr
 >>> gmx_mpi mdrun -s npt-new.tpr -cpi state.cpt

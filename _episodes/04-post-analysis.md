@@ -161,10 +161,11 @@ Found 19143 atoms with name OW
 ```
 
 
-> ### Exercise
+> ## Exercise
 > 
 > Create a group containing the hydrogen atoms in the water molecules.
-> > ### Solution
+> 
+> > ## Solution
 > > ```
 > > a HW1 | a HW2
 > > q

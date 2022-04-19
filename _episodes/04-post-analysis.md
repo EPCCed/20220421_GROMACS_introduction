@@ -161,15 +161,16 @@ Found 19143 atoms with name OW
 ```
 
 
->> ### Exercise
->> 
->> Create a group containing the hydrogen atoms in the water molecules.
->>> ### Solution
->>> ```
->>> a HW1 | a HW2
->>> q
->>> ```
->>> The OR | command can be used to select multiple groups of atoms.
+> ### Exercise
+> 
+> Create a group containing the hydrogen atoms in the water molecules.
+> > ### Solution
+> > ```
+> > a HW1 | a HW2
+> > q
+> > ```
+> > {: .language-bash}
+> > The OR | command can be used to select multiple groups of atoms.
 > {: .solution}
 {: .challenge}
 
@@ -237,14 +238,15 @@ gmx_mpi mdrun -s ${NEW}.tpr -cpi state.cpt
 ```
 
 
->> ### Exercise
->> 
->> Extend our simulation by 100ps.
->>> ### Solution
->>> ```
->>> gmx convert-tpr -s npt.tpr -extend 100 -o npt-new.tpr
->>> gmx_mpi mdrun -s npt-new.tpr -cpi state.cpt
->>> ```
+> ### Exercise
+> 
+> Extend our simulation by 100ps.
+> > ### Solution
+> > ```
+> > gmx convert-tpr -s npt.tpr -extend 100 -o npt-new.tpr
+> > gmx_mpi mdrun -s npt-new.tpr -cpi state.cpt
+> > ```
+> > {: .language-bash}
 > {: .solution}
 {: .challenge}
 

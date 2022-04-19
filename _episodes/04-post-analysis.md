@@ -239,10 +239,11 @@ gmx_mpi mdrun -s ${NEW}.tpr -cpi state.cpt
 ```
 
 
-> ### Exercise
+> ## Exercise
 > 
 > Extend our simulation by 100ps.
-> > ### Solution
+> 
+> > ## Solution
 > > ```
 > > gmx convert-tpr -s npt.tpr -extend 100 -o npt-new.tpr
 > > gmx_mpi mdrun -s npt-new.tpr -cpi state.cpt

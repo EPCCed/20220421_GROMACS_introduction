@@ -102,7 +102,9 @@ The main window will now show the motion of MD of the system.
 
 This can also be done quickly by using the command
 
-vmd confout.gro traj_comp.xtc 
+```
+vmd confout.gro traj_comp.xtc
+```
 
 
 Generating an index file
@@ -150,7 +152,28 @@ You should see something like the following:
 This lists all the default groups generated from the coordinate file.
 
 It is possible to create new index groups by using the command prompts listed.
-For now we will just save and quit with option ``q``.
+For example you can create a group of the O atoms in water with:
+
+```
+> a OW
+
+Found 19143 atoms with name OW
+```
+
+
+>> ## Exercise
+>> 
+>> Create a group of containing the hydrogen atoms in the water molecules.
+>>> ## Solution
+>>> ```
+>>> a HW1 | a HW2
+>>> q
+>>> ```
+>>> The OR | command can be used to select multiple groups of atoms.
+> {: .solution}
+{: .challenge}
+
+
 
 If you now open the ``5pep.ndx`` file we just generated you should see
 the different groups of atoms listed. Each number is an atom number from the 
@@ -170,14 +193,14 @@ Root mean squared deviation
 ----------------------------
 
 The following can be run to calculate the root mean squared deviation and
-least-squares fit for a group of atoms.
+least-squares fit for a group of atoms:
 
 ```
  gmx rms -s npt.tpr -f traj.trr -n 5pep.ndx -o rmsd.xvg -tu ns
 ```
 
 You will be prompted for a group number to do the calculation for.
-Select option 4 to do the Backbone of the protein. The ``-tu`` option
+Select option ``4`` to do the Backbone of the protein. The ``-tu`` option
 gives the time unit.
 
 
@@ -199,10 +222,10 @@ providing you have a ``state.cpt`` checkpoint file.
 
 In our case our simulation ran to completion, so we cannot restart it,
 however we may extend it. This can be done by generating a new tpr
-file with:
+with the ``convert-tpr`` command:
 
 ```
-gmx convert-tpr -s npt.tpr -extend timetoextendby -o npt-new.tpr
+gmx convert-tpr -s ${OLD}.tpr -extend timetoextendby -o ${NEW}.tpr
 ```
 
 where the timetoextendby is the time in ps
@@ -210,17 +233,26 @@ where the timetoextendby is the time in ps
 The job can then be run with the following gmx_mpi command:
 
 ```
-gmx_mpi mdrun -s npt-new.tpr -cpi state.cpt
+gmx_mpi mdrun -s ${NEW}.tpr -cpi state.cpt
 ```
 
-Use this to extend the simulation by 100ps.
 
+>> ## Exercise
+>> 
+>> Extend our simulation by 100ps.
+>>> ## Solution
+>>> ```
+>>> gmx convert-tpr -s npt.tpr -extend 100 -o npt-new.tpr
+>>> gmx_mpi mdrun -s npt-new.tpr -cpi state.cpt
+>>> ```
+> {: .solution}
+{: .challenge}
 
 
 Other analysis tools
 -----------------------
 
-A guide analysing your trajectory in GROMACS can be found on the 
+A guide for analysing your trajectory in GROMACS can be found on the 
 [website](https://manual.gromacs.org/documentation/2019/reference-manual/analysis.html)
 
 

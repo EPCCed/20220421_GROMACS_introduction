@@ -404,9 +404,9 @@ manual
 > between the edge of the box and the molecule.
 >
 > > ### Solution
-> > ```
-> > gmx editconf -f conf.gro -c -d 1 -bt cubic -o 5pep-box.gro
-> > ```
+> > 
+> > `gmx editconf -f conf.gro -c -d 1 -bt cubic -o 5pep-box.gro`
+> > 
 > {: .solution}
 {: .challenge}
 

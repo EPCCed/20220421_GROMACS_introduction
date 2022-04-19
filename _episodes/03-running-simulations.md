@@ -1,7 +1,7 @@
 ---
 title: "Running GROMACS simulations on ARCHER2"
-teaching: 30
-exercises: 45
+teaching: 25
+exercises: 20
 questions:
 - ""
 objectives:
@@ -27,19 +27,24 @@ keypoints:
 
 For this session, you will need a copy of the `5pep-neutral.gro` and 
 `topol.top` files generated in the previous session. You can either copy these 
-across or use pre-generated ones. To get the pregenerated files, run
+across or use pre-generated ones. To get the pregenerated files, run:
+
+```bash
+  svn checkout https://github.com/EPCCed/20220421_GROMACS_introduction/trunk/exercises
+```
 
 ```bash
   ; minim.mdp - used as input into grompp to generate em.tpr
   ; Parameters describing what to do, when to stop and what to save
-  integrator  = steep         ; Algorithm (steep = steepest descent minimization)
-  emtol       = 1000.0        ; Stop minimization when the maximum force < 1000.0 kJ/mol/nm
-  emstep      = 0.01          ; Minimization step size
-  nsteps      = 50000         ; Maximum number of (minimization) steps to perform
+  integrator      = steep         ; Algorithm (steep = steepest descent minimization)
+  emtol           = 1000.0        ; Stop minimization when the maximum force < 1000.0 kJ/mol/nm
+  emstep          = 0.01          ; Minimization step size
+  nsteps          = 50000         ; Maximum number of (minimization) steps to perform
 
   ; Logs and outputs
-  nstlog                   = 500
-  nstenergy                = 500
+  nstlog          = 500
+  nstenergy       = 500
+  nstxout         = 500
   
   ; Parameters describing how to find the neighbors of each atom and how to calculate the interactions
   nstlist         = 1         ; Frequency to update the neighbor list and long range forces
@@ -52,16 +57,19 @@ across or use pre-generated ones. To get the pregenerated files, run
 ```
 
 ```bash
-  gmx grommp -f minim.mdp -c 5pep-neutral.gro -p topol.top -o em.tpr
+  gmx grompp -f minim.mdp -c 5pep-neutral.gro -p topol.top -o ener_minim.tpr
 ```
 
 ```bash
-  gmx mdrun -v -deffnm em
+  gmx mdrun -v -s ener_minim.tpr
 ```
 
 ```bash
-  gmx energy -f em.edr -o potential.xvg
+  gmx energy -f ener.edr -o potential.xvg
 ```
+
+Select option `10` to plot the total potential energy of the system and 
+option `0` to exit the program.
 
 ## NPT simulations
 
@@ -74,6 +82,7 @@ across or use pre-generated ones. To get the pregenerated files, run
   ; Logs and outputs
   nstlog                   = 500
   nstenergy                = 500
+  nstxout                  = 500
   
   ; Bond constraints
   constraints              = h-bonds

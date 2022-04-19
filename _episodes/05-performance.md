@@ -1,7 +1,7 @@
 ---
 title: "Performance: getting the best bang for your (computational) buck"
-teaching: 30
-exercises: 30
+teaching: 15
+exercises: 60
 questions:
 - "How does our system perform as we scale up the number of cores on which we 
   run?"

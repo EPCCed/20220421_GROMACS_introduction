@@ -47,13 +47,13 @@ file that we want to remove as we will be solvating the system later on.
 You can see these in the pdb file if you open it. 
 
 To just get the protein itself we can use the following grep command to remove
-lines containing the water symbol 'HOH'.
+lines containing the water symbol ``'HOH'``.
 
 ```
 grep -v 'HOH' 5pep.pdb > 5pep_protein.pdb
 ```
 
-The new 5pep_protein.pdb file contains just the protein itself.
+The new ``5pep_protein.pdb`` file contains just the protein itself.
 
 ### Creating a Gromacs topology (PDB2GMX)
 
@@ -61,7 +61,7 @@ The new 5pep_protein.pdb file contains just the protein itself.
 Now we can create a Gromacs topolopy for the system.
 GROMACS ``pdb2gmx`` command is used to convert a coordinate file into a 
 set of GROMACS topology files and also create a processed structure file 
-in the GROMACS format .gro. 
+in the GROMACS format ``.gro``. 
 
 First you will need to load the GROMACS module on ARCHER2:
 
@@ -249,7 +249,7 @@ Protein_chain_A     1
 ```
 
 * This includes the position restriant file (which was created during 
-pdb2gmx) contains posisition restraits for the atoms. The if 
+``pdb2gmx``) contains posisition restraits for the atoms. The if 
 statement ensures it is only applied when POSRES is true.
 
 * The water forcefield tip3p is included
@@ -260,7 +260,7 @@ statement ensures it is only applied when POSRES is true.
 
 * The name of the system
 
-* The molecules in the system (so far just one protein chain
+* The molecules in the system (so far just one protein chain)
 
 #### The conf.gro file
 
@@ -279,7 +279,7 @@ PEPSIN
 ```
 The top lines are the system name and the number of atoms.
 
-The atomic coordinates in x,y,z of each atom are then listed. These
+The atomic coordinates in x,y,z of each atom are then listed in nm. These
 are preceeded by the residue number, residue name, atom name
 and atom number.
 
@@ -292,13 +292,13 @@ box[X][X],box[Y][Y],box[Z][Z], box[X][Y],box[X][Z],box[Y][X],box[Y][Z],box[Z][X]
 #### The posre.itp file
 
 This file contains the position restraints for the system. The force
-constants in x,yz are listed for the atom numbers.
+constants in x,y,z are listed for the atom numbers.
 
 ### Generating your own forcefield file
 
 Occasionally a system will contain non-protein residues which need separate 
 parameterisation as there are not forcefields available for them. You will 
-see a message when running pdb2gmx such as:
+see a message when running ``pdb2gmx`` such as:
 
 ```
 Residue 'XXX' not found in residue topology database
@@ -307,8 +307,6 @@ Residue 'XXX' not found in residue topology database
 In this case you must generate your own forcefield. In GROMACS to do this
 you can generate your own forcefield files in a {forcefield}.ff directory.
 More about this can be found on the Gromacs manual.
-
-[file format page](http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html)
 
 You can also generate an Amber or CHARMM topology by using the   AmberTool 
  ``antechamber`` function or the CHARMM ``cgenff`` function. To do this, you 
@@ -319,11 +317,14 @@ or ``cgenff`` (for CHARMM). The topologies generated in this way can then be
 added to the GROMACS topology that you generated. 
   
 
-.. note::
+---
+**NOTE**
 
-  It is advised to use one of the pre-existing GROMACS forcefields where 
-  possible. Only consider generating your own forcefield if the ones 
-  available on GROMACS do not fulfill your requirements.
+It is advised to use one of the pre-existing GROMACS forcefields where 
+possible. Only consider generating your own forcefield if the ones 
+available on GROMACS do not fulfill your requirements.
+
+---
 
 GROMACS comes with a number of forcefields available out of the box. These 
 forcefields are stored within the main GROMACS directory in 
@@ -339,7 +340,8 @@ atoms, bond, angles, dihedrals, *etc.*. You can find more information about
 generating topology files from scratch in the GROMACS manual 
 [file format page](http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html).
 
-.. note::
+---
+**NOTE**
 
   You can also generate an Amber or CHARMM topology by using the   AmberTool 
   ``antechamber`` function or the CHARMM ``cgenff`` function. To do this, you 
@@ -364,6 +366,8 @@ manual pages about
 [adding a residue](http://manual.gromacs.org/documentation/current/how-to/topology.html)
 and [force field organisations](http://manual.gromacs.org/documentation/current/reference-manual/topologies/force-field-organization.html)
 
+---
+
 
 ## Preparing and solvating your simulation box
 
@@ -375,23 +379,38 @@ Now that a topology has been generated, the next step is to generate a
 simulation box into which to place this topology. For this, use the 
 ``editconf`` command. This tool has a number of functionalities, including 
 generating and orienting a simulation box, and filing it with pre-generated 
-topologies. To create the simulation box with ``editconf``, run the following:
+topologies. Creating a simulation box with ``editconf`` can
+be done with the following:
 
 ```
-gmx editconf -f conf.gro -c -d 1 -bt cubic -o 5pep-box.gro
+gmx editconf -f ${SYSTEM}.gro -d ${SEPARATION} -bt {BOX_TYPE} -o ${OUTPUT}.gro
 ```
 
-where ``coonf.gro`` is the input forcefield-compliant coordinate file, 
-``5pep-box.gro`` is the chosen output name (the default is ``out.gro``), 
-the ``-c`` flag will place the system described in ``conf.gro`` into the 
+where ``${SYSTEM}.gro`` is the input coordinate file, 
+``${OUTPUT}.gro`` is the chosen output name (the default is ``out.gro``), 
+the ``-c`` flag will place the input system into the 
 centre of the simulation box, ``-d ${SEPARATION}`` defines the minimum 
-separation between the input and the edge of the box (here 1 nm), and 
-``-bt ${BOX_TYPE}`` defines the type of box for the simulation (triclinic is 
-the default, but other options are cubic, octohedral, or dodecahedral). There 
+separation between the input and the edge of the box, and 
+``-bt ${BOX_TYPE}`` defines the type of box for the simulation. There 
 are a number of other ``editconf`` options, predominantly to have more 
 control over defining the simulation box. These can be found in the GROMACS 
 manual 
 [gmx editconf page](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-editconf.html)
+
+> ### Exercise
+>
+> Use the editconf command to generate a cubic simulation box for our system.
+> The molecule should be centred in the box, and a seperation of 1 nm should be used 
+> between the edge of the box and the molecule.
+>
+> > ### Solution
+> > ```
+> > gmx editconf -f conf.gro -c -d 1 -bt cubic -o 5pep-box.gro
+> > ```
+> {: .solution}
+{: .challenge}
+
+
 
 If you now look at the new ``5pep-box.gro`` file you should see the box
 dimensions have changed - the box is now cubic.
@@ -400,7 +419,7 @@ dimensions have changed - the box is now cubic.
 
 
 The aptly-named ``solvate`` tool can be used to create a box of solvent or 
-to solvate a pre-existing box. To solvate our systemwe will run:
+to solvate a pre-existing box. To solvate our system we will run:
 
 
 ```
@@ -482,8 +501,7 @@ this case, these can be ignored (this is an exception and is not usually true).
 Now that the ``.tpr`` has been generated, ``genion`` can be used to make the 
 charge of the system neutral. The system charge is decreased by replacing a 
 number of parts of the system with anions and cations. This is done by 
-running the following (note that the ``${INPUT}.tpr`` named below is likely 
-to be the ``${OUTPUT.tpr}`` generated in the ``grompp`` step above): 
+running the following: 
 
 ```
 gmx genion -s ions.tpr -p topol.top -neutral -o 5pep-neutral.gro
@@ -523,9 +541,7 @@ Once the group is chosen, ``genion`` will replace a number of that
 group with anions and cations until the system is charge neutral. The default 
 anion name is ``CL``, though this name can be changed with the ``-nname`` 
 flag, and the default cation name is ``NA``, but this name can be changed with 
-the ``nname`` flag. By default, the cation and anion charges are 1 and -1 
-respectively, but this can be changed with the ``-pq`` flag for the cation and 
-the ``-nq`` flag for the anion.
+the ``nname`` flag. 
 
 You should see the following, indicating the water molecules that will be
 replaced by soduim ions:
@@ -577,9 +593,8 @@ For further information, please see the GROMACS manual
 and [gmx genion](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-genion.html) 
 pages.
 
-We are now ready to run simulations.
+We are now ready to run a simulation.
 
-{: .challenge}
 
 {% include links.md %}
 

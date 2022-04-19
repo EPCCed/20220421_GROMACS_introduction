@@ -397,13 +397,13 @@ control over defining the simulation box. These can be found in the GROMACS
 manual 
 [gmx editconf page](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-editconf.html)
 
-> ### Exercise
+> ## Exercise
 >
 > Use the editconf command to generate a cubic simulation box for our system.
 > The molecule should be centred in the box, and a seperation of 1 nm should be used 
 > between the edge of the box and the molecule.
 >
-> > ### Solution
+> > ## Solution
 > > 
 > > `gmx editconf -f conf.gro -c -d 1 -bt cubic -o 5pep-box.gro`
 > > 

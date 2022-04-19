@@ -1,7 +1,7 @@
 ---
 title: "Preparing a GROMACS system"
 teaching: 30
-exercises: 30
+exercises: 15
 questions:
 - "How do I set up a system ready to be run with GROMACS"
 objectives:

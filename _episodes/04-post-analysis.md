@@ -6,9 +6,11 @@ questions:
 - "What output files does GROMACS produce?"
 - "What properties of my system can I see after my simulation has run?"
 - "How can I visualise my system?"
+- "How can I continue my simulation if it stops?"
 objectives:
 - "Learn how to extract the thermodynamic properties from the output"
 - "Learn about the types of analysis we can perform"
+
 
 keypoints:
 - "Use of gmx energy, make_ndx, rms"
@@ -205,13 +207,19 @@ You will be prompted for a group number to do the calculation for.
 Select option ``4`` to do the Backbone of the protein. The ``-tu`` option
 gives the time unit.
 
+In general this is how analysis tools in GROMACS work. The trajectory
+file is passed using the `-f` option, and if using a index file this is passed
+with the `-n` option.
+
+A guide for the tools for analysing your trajectory in GROMACS can be found on the 
+[website](https://manual.gromacs.org/documentation/2019/reference-manual/analysis.html)
 
 Continuing your simulation
 ---------------------------
 
 You may wish to restart your simulation from the point you left off
 in order to progress the simulation further or if your simulation 
-does not complete. GROMACS does checkpointing during a simulation
+does not complete for some reason. GROMACS does checkpointing during a simulation
 to allow this. 
 
 A simulation can be restarted with:
@@ -241,7 +249,7 @@ gmx_mpi mdrun -s ${NEW}.tpr -cpi state.cpt
 
 > ## Exercise
 > 
-> Extend our simulation by 100ps.
+> Extend our simulation by 100ps and submit the job to run on the compute nodes.
 > 
 > > ## Solution
 > > ```
@@ -253,11 +261,7 @@ gmx_mpi mdrun -s ${NEW}.tpr -cpi state.cpt
 {: .challenge}
 
 
-Other analysis tools
------------------------
 
-A guide for analysing your trajectory in GROMACS can be found on the 
-[website](https://manual.gromacs.org/documentation/2019/reference-manual/analysis.html)
 
 
 {% include links.md %}

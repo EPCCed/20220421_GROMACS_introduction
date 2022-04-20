@@ -23,7 +23,8 @@ In this lesson we will describe how to choose and
 prepare the input files for a system before to running a Gromacs 
 simulation.
 
-As an example we will be looking at pepsin. The PDB entry can be 
+As an example we will be looking at pepsin. This is an enzyme used in
+digestion. The PDB entry can be 
 found [here](https://www.rcsb.org/structure/5pep) and the PDB file can be
 downloaded from the protein data bank
 using:
@@ -35,7 +36,7 @@ wget https://files.rcsb.org/download/5pep.pdb
 
 This protein is used as an example but this process could apply to a general
 system where
-you start from a .pdb file and end up with a set of input files, ready to
+you start from a `.pdb` file and end up with a set of input files, ready to
 run a GROMACS simulation.
 
 ### Splitting up the system
@@ -59,8 +60,8 @@ The new ``5pep_protein.pdb`` file contains just the protein itself.
 
 
 Now we can create a Gromacs topolopy for the system.
-GROMACS ``pdb2gmx`` command is used to convert a coordinate file into a 
-set of GROMACS topology files and also create a processed structure file 
+The GROMACS ``pdb2gmx`` command is used to convert a `pdb` coordinate file into a 
+ GROMACS topology file and also create a processed structure file 
 in the GROMACS format ``.gro``. 
 
 First you will need to load the GROMACS module on ARCHER2:
@@ -74,13 +75,18 @@ Then you can run:
 gmx pdb2gmx -f 5pep_protein.pdb
 ```
 
-You will be 
-prompted to select the forcefield you would like to use. GROMACS comes with 
+You will be prompted to select the forcefield you would like to use. GROMACS comes with 
 a number of AMBER and GROMOS forcefields, as well as a CHARMM and an OPLS-AA
 option. You will also need to specify your water model (choices included are 
-TIP models, and the SPC and SPC/E models). Specifying the water model here 
-results in ``pdb2gmx`` to write a complete topology and will ensure that all
-topology files are consistent if the system needs to be hydrated.
+TIP models, and the SPC and SPC/E models). 
+
+---
+**NOTE**
+
+We do not currently  have any waters in our system, however the water model 
+is needed to ensure the topology is consistent when the system is solvated.
+
+---
 
 ```
 Command line:
@@ -140,10 +146,10 @@ Total charge -38.000 e
 ```
 
 The  total charge 
-is particularly important to note down and will be used in the `Solvating and 
+is  important to note and will be used in the `Solvating and 
 ionise a system` step of system preparation.
 
-More information about the flags and options of this program can be found in 
+More information about PDB2GMX can be found in 
 the GROMACS 
 [PDB2GMX manual](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-pdb2gmx.html)
 
@@ -294,6 +300,9 @@ box[X][X],box[Y][Y],box[Z][Z], box[X][Y],box[X][Z],box[Y][X],box[Y][Z],box[Z][X]
 This file contains the position restraints for the system. The force
 constants in x,y,z are listed for the atom numbers.
 
+More information about file formats can be found in the GROMACS manual
+[file formats](http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html).
+
 ### Generating your own forcefield file
 
 Occasionally a system will contain non-protein residues which need separate 
@@ -326,47 +335,11 @@ available on GROMACS do not fulfill your requirements.
 
 ---
 
-GROMACS comes with a number of forcefields available out of the box. These 
-forcefields are stored within the main GROMACS directory in 
-``share/gromacs/top``. If the forcefield you want to use is not present, you
-will need to generate your own forcefield files. To do this, create a 
-directory ``<forcefield>.ff`` in your working directory, with ``<forcefield>``
-replaced by a sensible name. Within this directory, create a 
-``forcefield.doc`` file and write a simple one-sentence description of your 
-forcefield -- this description is what will come up in ``pdb2gmx`` when you 
-choose a forcefield. Next, generate a ``forcefield.itp`` included topology 
-file. This file is a topology file where you can define the parameters for 
-atoms, bond, angles, dihedrals, *etc.*. You can find more information about 
-generating topology files from scratch in the GROMACS manual 
-[file format page](http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html).
-
----
-**NOTE**
-
-  You can also generate an Amber or CHARMM topology by using the   AmberTool 
-  ``antechamber`` function or the CHARMM ``cgenff`` function. To do this, you 
-  should follow the procedures described above, making sure to select an 
-  appropriate forcefield from the selection GROMACS provides. Then, use a 
-  parameter-generating tool like ``antechamber`` with ``actype`` (for Amber) 
-  or ``cgenff`` (for CHARMM). The topologies generated in this way can then be 
-  added to the GROMACS topology that you generated. This can be done by 
-  opening the GROMACS topology file and including the following line at the start:
-  
-
-```
-    #include "/path/to/forcefield_file.itp"
-```
-
-
-  where the path is to the topology file generated in ``antechamber`` or 
-  ``cgenff``.
-
 For more information on generating your own forcefield, please see the GROMACS
 manual pages about 
 [adding a residue](http://manual.gromacs.org/documentation/current/how-to/topology.html)
 and [force field organisations](http://manual.gromacs.org/documentation/current/reference-manual/topologies/force-field-organization.html)
 
----
 
 
 ## Preparing and solvating your simulation box
@@ -388,12 +361,10 @@ gmx editconf -f ${SYSTEM}.gro -d ${SEPARATION} -bt {BOX_TYPE} -o ${OUTPUT}.gro
 
 where ``${SYSTEM}.gro`` is the input coordinate file, 
 ``${OUTPUT}.gro`` is the chosen output name (the default is ``out.gro``), 
-the ``-c`` flag will place the input system into the 
-centre of the simulation box, ``-d ${SEPARATION}`` defines the minimum 
+``-d ${SEPARATION}`` defines the minimum 
 separation between the input and the edge of the box, and 
 ``-bt ${BOX_TYPE}`` defines the type of box for the simulation. There 
-are a number of other ``editconf`` options, predominantly to have more 
-control over defining the simulation box. These can be found in the GROMACS 
+are a number of other ``editconf`` options that can be found in the GROMACS 
 manual 
 [gmx editconf page](http://manual.gromacs.org/documentation/current/onlinehelp/gmx-editconf.html)
 
@@ -417,7 +388,7 @@ dimensions have changed - the box is now cubic.
 ### Solvating a system
 
 
-The aptly-named ``solvate`` tool can be used to create a box of solvent or 
+The ``solvate`` tool can be used to create a box of solvent or 
 to solvate a pre-existing box. To solvate our system we will run:
 
 
@@ -426,13 +397,9 @@ gmx solvate -cp 5pep-box.gro -cs spc216.gro -o 5pep-solv.gro -p topol.top
 ``` 
  
 where ``5pep-box.gro`` is our simulation box configured using the steps 
-described above, ``spc216.gro`` is the solvent configuration file (note 
-that GROMACS has a number of pre-defined solvent configuration files but that 
-you can also prepare and use your own), and ``topol.top`` is the 
-topology we obtained when running `GMX2PDB`. Here ``spc216.gro`` is compatitable 
-with the 3 point tip3p model we are using. If using a GROMACS-provided 
-solvent, the addition of this solvent should not alter the net charge of the 
-system.
+described above, ``spc216.gro`` is the solvent configuration file, and ``topol.top`` is the 
+topology from earlier. Here ``spc216.gro`` is compatitable 
+with the 3 point tip3p model we are using. 
 
 Now we have ``5pep-solv.gro``. You should also see the message when runnning
 solvate:
@@ -463,7 +430,7 @@ For further information on solvate, please see the GROMACS manual
 
 Adding ions to your solvated system can serve two purposes: it can help to 
 neutralise any charge in your system; and it allows you to simulate systems 
-with similar salt concentrations to their real-world equivalents. 
+with similar salt concentrations to their real-world equivalents.
 
 You may have noticed earlier that our system is charged. Here we will
 neutralise it by adding ions.
@@ -477,12 +444,13 @@ counterions using ``genion``.
 The GROMACS preprocessor tool ``grompp`` reads in coordinate and topology 
 files to generate an atomic-level input file (with a ``.tpr`` extension). 
 This ``.tpr`` file contains all of the parameters needed for all atoms in 
-the system. We will go into more details about the ``grompp`` tool in the 
-`Running a simulation` lesson. For now, the important part is that, to 
-generate a run input ``.tpr`` file, ``grompp`` needs a structure (``.gro``) 
+the system. 
+
+
+In order to generate a run input ``.tpr`` file, ``grompp`` needs a structure (``.gro``) 
 file, a topology (``.top``) file, and a file defining the instructions for 
 the simulation run (this is kept in an ``.mdp`` file). This ``.mdp`` file can 
-be kept empty when ionising the system as no actual simulation is to be run. 
+be empty when ionising the system as no actual simulation is run. 
 To generate the ``.tpr`` file, run:
 
 
@@ -495,7 +463,10 @@ gmx grompp -f mdrun.mdp -c 5pep-solv.gro -p topol.top -o ions.tpr
  
 ``grompp`` will output a number of notes to screen (one of 
 which should be reminding you of the net non-zero charge of your system). In 
-this case, these can be ignored (this is an exception and is not usually true).
+this case, these can be ignored.
+
+In some cases you may see warnings at this point. These should not be ignored
+unless you are sure that your set up is correct.
 
 Now that the ``.tpr`` has been generated, ``genion`` can be used to make the 
 charge of the system neutral. The system charge is decreased by replacing a 
@@ -507,12 +478,9 @@ gmx genion -s ions.tpr -p topol.top -neutral -o 5pep-neutral.gro
 ```
 
 
-You will be prompted to choose the group within your system (solvents, 
-solutes, protein backbones, *etc.*) that you would like ions to replace.
-Note that some groups 
-may have overlap completely and be different names for the same group. In 
-general, it is best to replace solvent molecules with ions (the group named 
-``SOL``). 
+You are then asked to choose the group within your system that the ions will replace.
+Here we will replace some of the solvent `SOL` molecules with ions. This ensures
+that the protein itself remains intact.
 
 ```
 Reading file ions.tpr, VERSION 2021.3 (single precision)
@@ -537,10 +505,9 @@ Select a group: 13
 ```
 
 Once the group is chosen, ``genion`` will replace a number of that 
-group with anions and cations until the system is charge neutral. The default 
-anion name is ``CL``, though this name can be changed with the ``-nname`` 
-flag, and the default cation name is ``NA``, but this name can be changed with 
-the ``nname`` flag. 
+group with anions and cations until the system is charge neutral.
+
+In our case 38 NA atoms are replaced in the water molecules.
 
 You should see the following, indicating the water molecules that will be
 replaced by soduim ions:

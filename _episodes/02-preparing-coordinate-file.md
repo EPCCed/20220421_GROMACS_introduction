@@ -13,6 +13,15 @@ keypoints:
 - "Adding ions to neurtalise your system"
 ---
 
+# What is GROMACS?
+
+* Gromacs is a package to perform molecular dynamics simulations
+* It is primarily designed for biochemical molecules like proteins, lipids and nucleic acids
+* It has a lot of optimisations in the code that make it perform well compared to other programs
+* It includes a range of tools for topology building, editing a system, and doing analysis on simulation trajectories
+
+[The GROMACS website](https://www.gromacs.org)
+
 # Preparing a system for GROMACS
 
 In this lesson we will describe how to choose and

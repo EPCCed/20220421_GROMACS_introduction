@@ -1,0 +1,37 @@
+; npt.mdp -- taken from: https://docs.bioexcel.eu/gromacs_bpg/
+; Intergrator, timestep, and total run time
+integrator               = md                ; Leap-frog MD algorithm
+dt                       = 0.002             ; Sets timestep at 2 ns
+nsteps                   = 500000            ; Sim will run 500,000 timesteps
+
+; Logs and outputs
+nstlog                   = 500               ; Output to md.log every 500 dt
+nstenergy                = 500               ; Output to ener.edr every 500 dt
+nstxout                  = 500               ; Output to trajj.trr every 500 dt
+
+; Bond constraints
+constraints              = h-bonds           ; Make H bonds in protein be rigid
+constraint-algorithm     = lincs             ; Define algorithm to make bonds rigid
+
+; Van der Waals interactions
+vdwtype                  = Cut-off           ; Define type of short-ranged interaction
+rvdw                     = 1.0               ; Define short-ranged cutoff as 1 nm
+cutoff-scheme            = Verlet            ; Generate pair lists to speed up simulation
+DispCorr                 = EnerPres          ; Apply corrections to mitigate using cutoff
+pbc                      = xyz               ; PBC in all 3 dimensions
+
+; Coulombic interactions
+coulombtype              = PME               ; Define type of long-ranged interactions
+rcoulomb                 = 1.0               ; Define long-ranged cutoff as 1nm
+
+; Thermostat
+tcoupl                   = V-rescale         ; Define type of thermostat
+tc-grps                  = Protein  SOL NA   ; Define groups to be affected by thermostat
+ref-t                    = 300      300 300  ; Define temperature for each group in Kelvins
+tau-t                    = 0.1      0.1 0.1  ; Define temperature coupling time
+
+; Barostat
+pcoupl                   = Parrinello-Rahman ; Define type of barostat
+ref-p                    = 1.0               ; Define system pressure in bars
+tau-p                    = 2.0               ; Define pressure coupling time
+compressibility          = 4.5e-5            ; Define compressibility of system in bar^-1

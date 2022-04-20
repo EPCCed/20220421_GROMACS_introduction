@@ -13,11 +13,7 @@ keypoints:
 - "Adding ions to neurtalise your system"
 ---
 
-
-
-
 # Preparing a system for GROMACS
-
 
 In this lesson we will describe how to choose and
 prepare the input files for a system before to running a Gromacs 
@@ -31,7 +27,6 @@ using:
 ```
 wget https://files.rcsb.org/download/5pep.pdb
 ```
-
 
 This protein is used as an example but this process could apply to a general
 system where
@@ -56,7 +51,6 @@ grep -v 'HOH' 5pep.pdb > 5pep_protein.pdb
 The new ``5pep_protein.pdb`` file contains just the protein itself.
 
 ### Creating a Gromacs topology (PDB2GMX)
-
 
 Now we can create a Gromacs topolopy for the system.
 GROMACS ``pdb2gmx`` command is used to convert a coordinate file into a 
@@ -191,27 +185,34 @@ residues. The meaning of the columns are as follows:
 * ``typeB``, ``chargeB``, ``massB``: Additional type, charge and mass used for free energy perturbation 
 
 The bonds directive lists pairs of atoms which are bonded
+
 ```
 [ bonds ]       
 ;  ai    aj funct            c0            c1            c2            c3
     1     2     1      
     1     3     1      
 ```    
- The pairs directive lists LJ pairs of atoms by their atom number
- ```
+
+The pairs directive lists LJ pairs of atoms by their atom number
+
+```
  [ pairs ]
 ;  ai    aj funct            c0            c1            c2            c3
     1     8     1
     1     9     1
- ```   
- The angles directive lists triplets of 3 atoms for angle parameterisation
  ```
+
+The angles directive lists triplets of 3 atoms for angle parameterisation
+ 
+```
  [ angles ]
 ;  ai    aj    ak funct            c0            c1            c2            c3
     2     1     3     1
     2     1     4     1
 ```
+
 The dihedreal 
+
 ```
 [ dihedrals ]
 ;  ai    aj    ak    al funct            c0            c1            c2            c3            c4            c5
@@ -220,6 +221,7 @@ The dihedreal
 ```
 
 The final lines of the file are:
+
 ```
 ; Include Position restraint file
 #ifdef POSRES  
@@ -481,7 +483,7 @@ the system. We will go into more details about the ``grompp`` tool in the
 `Running a simulation` lesson. For now, the important part is that, to 
 generate a run input ``.tpr`` file, ``grompp`` needs a structure (``.gro``) 
 file, a topology (``.top``) file, and a file defining the instructions for 
-the simulation run (this is kept in an ``.mdp`` file). This ``.mdp`` file can 
+the simulation run (this is kept in an `.mdp` file). This `.mdp` file can 
 be kept empty when ionising the system as no actual simulation is to be run. 
 To generate the ``.tpr`` file, run:
 
@@ -543,7 +545,7 @@ flag, and the default cation name is ``NA``, but this name can be changed with
 the ``nname`` flag. 
 
 You should see the following, indicating the water molecules that will be
-replaced by soduim ions:
+replaced by sodium ions:
 
 ```
 Replacing solvent molecule 800 (atom 7082) with NA

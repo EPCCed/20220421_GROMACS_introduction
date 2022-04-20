@@ -183,7 +183,9 @@ Protein_chain_A     3
 The #include statemate includes the amber03 forcefield that we selected
 when running pdb2gmx. 
 
-The [ moleculetype ] gives the molecule name and the number of exclusions. 
+The [ moleculetype ] gives the molecule name and the number of exclusions. The
+number of exclusions is the number of bonds away for which non-bonded interactions
+between pairs of atoms are excluded.
 The [ atoms ] directive lists the atoms in the molecule, grouped by the different
 residues. The meaning of the columns are as follows:
 
@@ -196,34 +198,39 @@ residues. The meaning of the columns are as follows:
 * ``mass``: the atomic mass
 * ``typeB``, ``chargeB``, ``massB``: Additional type, charge and mass used for free energy perturbation 
 
-The bonds directive lists pairs of atoms which are bonded
+The bonds directive lists pairs of atoms which are bonded:
 ```
 [ bonds ]       
 ;  ai    aj funct            c0            c1            c2            c3
     1     2     1      
     1     3     1      
 ```    
- The pairs directive lists LJ pairs of atoms by their atom number
+ The pairs directive lists LJ pairs of atoms by their atom number:
  ```
  [ pairs ]
 ;  ai    aj funct            c0            c1            c2            c3
     1     8     1
     1     9     1
  ```   
- The angles directive lists triplets of 3 atoms for angle parameterisation
+ The angles directive lists triplets of 3 atoms for angle parameterisation:
  ```
  [ angles ]
 ;  ai    aj    ak funct            c0            c1            c2            c3
     2     1     3     1
     2     1     4     1
 ```
-The dihedreal 
+The dihedreal angles for 4 atoms:
 ```
 [ dihedrals ]
 ;  ai    aj    ak    al funct            c0            c1            c2            c3            c4            c5
     2     1     5     6     9
     2     1     5     7     9
 ```
+
+These `func` numbers give the function type to be used for the interaction. 
+This corresponds to interactions listed in the forcefield field ``.itp`` for 
+different atom pair, triplets etc.
+
 
 The final lines of the file are:
 ```
@@ -299,6 +306,8 @@ box[X][X],box[Y][Y],box[Z][Z], box[X][Y],box[X][Z],box[Y][X],box[Y][Z],box[Z][X]
 
 This file contains the position restraints for the system. The force
 constants in x,y,z are listed for the atom numbers.
+
+More information about how these are defined is given [here](https://manual.gromacs.org/documentation/current/reference-manual/functions/restraints.html#positionrestraint)
 
 More information about file formats can be found in the GROMACS manual
 [file formats](http://manual.gromacs.org/documentation/current/reference-manual/file-formats.html).

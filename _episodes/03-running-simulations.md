@@ -55,11 +55,9 @@ how to implement them in GROMACS.
 
 ## Running a simulations
 
-[GROMACS `mdrun` page](https://manual.gromacs.org/documentation/current/onlinehelp/gmx-mdrun.html)
-
 For this session, you will need a copy of the `5pep-neutral.gro` and 
 `topol.top` files generated in the previous session. You can either copy these 
-across or use pre-generated ones. To get the pregenerated files, run:
+across or use pregenerated ones. To get the pregenerated files, run:
 
 ```bash
   svn checkout https://github.com/EPCCed/20220421_GROMACS_introduction/trunk/exercises
@@ -122,7 +120,6 @@ find out more about the way this works, the
 is a great starting place.
 
 
-
 ```bash
   ; minim.mdp - taken from http://www.mdtutorials.com/gmx/
   ; Parameters describing what to do, when to stop and what to save
@@ -174,17 +171,18 @@ are a number of commands defining what resources we want to reserve with Slurm
 module that we've been using, a command to define the number of OpenMP threads 
 we want (we will talk more about this in the final session of today when we 
 discuss performance), and a GROMACS command line (it is commented with a `#` 
-below to ensure that noone accidentally copies it to run on the ARCHER2 login 
+below to ensure that no-one accidentally copies it to run on the ARCHER2 login 
 nodes):
 
 ```bash
   # gmx mdrun -ntomp ${SLURM_CPUS_PER_TASK} -v -s ener_minim.tpr
 ```
 
-The `mdrun` command indicates that this is a molecular dynamics run -- though 
-the aim of this is to equilibrate the system, this still constitutes a GROMACS 
-molecular dynamics simulation. the `-v` flag specifies that we would like a 
-verbose output to the GROMACS log file -- this can be particularly useful for 
+The [`mdrun`](https://manual.gromacs.org/documentation/current/onlinehelp/gmx-mdrun.html)
+command indicates that this is a molecular dynamics run -- though the aim of 
+this is to equilibrate the system, this still constitutes a GROMACS molecular 
+dynamics simulation. the `-v` flag specifies that we would like a verbose 
+output to the GROMACS log file -- this can be particularly useful for 
 debugging your simulation when anything goes wrong. The `-s` flag lets us 
 define our GROMACS `.tpr` file. Finally, the `-ntomp` flag defines the number 
 of OpenMP threads we want per MPI process (in this case one).
@@ -199,11 +197,11 @@ Once your job has completed, you will notice that a number of outputs have
 been generated:
 
   - `md.log` -- A text file that contains all of the thermodynamic information 
-     output during the run (e.g. energy breakdowns, instantaneous presssure 
-     and temperature, system denstity, etc.).
+     output during the run (e.g. energy breakdowns, instantaneous pressure 
+     and temperature, system density, etc.).
   - `ener.edr` -- A binary file that contains all of the thermodynamic 
     information output during the run (e.g. energy breakdowns, instantaneous 
-     presssure and temperature, system denstity, etc.).
+     pressure and temperature, system density, etc.).
   - `traj.trr` -- A binary that contains details of the simulation trajectory.
   - `confout.gro` -- A text file containing the particle coordinates and 
     velocities for the final step of the simulation.
@@ -310,4 +308,3 @@ the barostat and thermostat. With this file, you can restart simulations while
 ensuring that your temperature and pressure coupling are not wrong.
 
 {% include links.md %}
-

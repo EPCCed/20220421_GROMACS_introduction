@@ -307,4 +307,68 @@ GROMACS checkpoint (`.cpt`) file that keeps track of information related to
 the barostat and thermostat. With this file, you can restart simulations while 
 ensuring that your temperature and pressure coupling are not wrong.
 
+## Common advanced molecular dynamics techniques used
+
+### Perdiodic boundary conditions
+
+Boundary effects can be a problem in molecular dynamics. If you are simulating 
+just the simulation box you built, you will end up with either surface-like 
+boundaries at the edges of your simulation box or with your simulation being 
+surrounded by an infinity vacuum. Either of these can affect the physics of 
+the system you are studying.
+
+One way to get around this is to apply periodic boundary conditions (PBCs). 
+PBCs are a method of simulating your system as if it is in bulk. These work by 
+considering that your system is in the centre of a number of replicas of your 
+system. When a particle from your simulation box exits through the left-hand 
+side of your box, an identical image of this particle originating from an 
+exact image of your simulation box will enter through the right-hand side of 
+your box.
+
+{% include figure.html url="" max-width="80%" file="/fig/pbc.jpg" alt="Periodic boundary conditions" %}
+
+With PBCs, you are effectively simulating an infinite crystal, with your 
+simulation box as the unit cell. This means that long-ranged (electrostatic) 
+interactions can be solved to a high degree of accuracy by using Fourier 
+transforms.
+
+One must be careful when using PBCs -- if your system is too small, you may 
+end up in a situation where parts of your system are interacting with their 
+periodic images. In that case, those parts of the system will be affecting and 
+dictating their own behaviour! This is not correct physically.
+
+### Neighbour lists
+
+As you have seen, each step in a molecular dynamics simulation requires you 
+to calculate the potential energy acting on every particle in your system. 
+Usually, simulations will use pairwise particle interactions that depend on 
+the inter-particle distance of each particle with every other particle.
+
+{% include figure.html url="" max-width="80%" file="/fig/lj.jpg" alt="Lennard-Jones potential energy" %}
+
+Calculating the distance between each pair of particles can be costly -- this 
+will require O(N^2) calculations per timestep! Furthermore, a lot of these 
+pairwise interactions (such as the Lennard-Jones potential we have been using 
+to simulate our van der Waals interactions) tend to 0 on a scale much smaller 
+than the size of your simulation box (and are even truncated at a cutoff 
+distance). This means that we are spending a lot of time calculating the 
+distance between particle pairs that will effectively not be interacting.
+
+{% include figure.html url="" max-width="80%" file="/fig/neigh_list.jpg" alt="Neighbour lists" %}
+
+Neighbour lists allow us to be more selective and more efficient when running 
+our simulations. If we consider a cutoff that is slightly larger than our van 
+der Waals cutoff, we can generate for each particle a list of the other 
+particles that fall within our cutoff. These particles are the most likely 
+contenders to either already be within our short-ranged interaction distance 
+or to make it into this distance for the next few timesteps. Therefore, 
+instead of considering the inter-particle distance for all particle pairs, we 
+can consider only the distances for particles within our neighbour list. This 
+will reduce the runtime per timestep significantly. Furthermore, for systems 
+at or near uniform density, this results in the expected computational time of 
+your system to increase as ~O(N) rather than O(N^2) when you increase the 
+number of particles of your system (e.g. doubling your system size should 
+double your simulation time rather than quadruple it). Note that this is only 
+true for the time spent calculating short-ranged interactions.
+
 {% include links.md %}
